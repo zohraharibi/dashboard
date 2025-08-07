@@ -4,7 +4,7 @@ import SideBlock from './SideBlock';
 
 const MainContent: React.FC = () => {
   return (
-    <div className="row g-0 h-100 --bg-secondary">
+    <div className="row g-0 h-100">
       <div className="col-md-8 col-lg-9 ">
         <MainBlock />
       </div>

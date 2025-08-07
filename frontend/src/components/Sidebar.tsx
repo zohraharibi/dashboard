@@ -26,11 +26,10 @@ const Sidebar: React.FC = () => {
     }
   };
   return (
-    <div className="d-flex flex-column" style={{ width: '80px', height: '100vh', backgroundColor: 'var(--bg-sidebar)' }}>
+    <div className="d-flex flex-column sidebar-main">
       {/* Logo */}
       <div className="p-3 text-center">
-        <div className="rounded-circle d-inline-flex align-items-center justify-content-center" 
-             style={{ width: '40px', height: '40px', backgroundColor: 'var(--primary-green)' }}>
+        <div className="rounded-circle d-inline-flex align-items-center justify-content-center sidebar-logo">
           <i className="bi bi-graph-up text-white"></i>
         </div>
       </div>
@@ -39,12 +38,12 @@ const Sidebar: React.FC = () => {
       <nav className="flex-grow-1 py-3">
         <ul className="nav nav-pills flex-column align-items-center">
           <li className="nav-item mb-3">
-            <a href="#" className="nav-link" style={{ color: 'var(--primary-green)' }}>
+            <a href="#" className="nav-link sidebar-nav-active">
               <i className="bi bi-pie-chart fs-5"></i>
             </a>
           </li>
           <li className="nav-item mb-3">
-            <a href="#" className="nav-link" style={{ color: 'var(--text-secondary)' }}>
+            <a href="#" className="nav-link sidebar-nav-secondary">
               <i className="bi bi-clock-history fs-5"></i>
             </a>
           </li>

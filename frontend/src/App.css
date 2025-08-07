@@ -1,4 +1,3 @@
-/* CSS Custom Properties - Color Variables */
 :root {
   /* Primary Colors */
   --primary-green: #20c997;        /* Main teal/green accent */
@@ -37,7 +36,9 @@
   --bg-sidebar: #1a1d23;           /* Sidebar dark */
   --text-primary: #ffffff;         /* White text */
   --text-secondary: #8b949e;       /* Muted light text */
+  --text-light: #6c757d;           /* Light text for dark mode */
   --border-light: #30363d;         /* Dark borders */
+  --border-medium: #21262d;        /* Medium borders for dark mode */
   --chart-grid: #30363d;           /* Dark chart grid */
 }
 
@@ -45,6 +46,65 @@
 .table {
   background-color: transparent !important;
 }
+
+/* Bootstrap text utility overrides */
+.text-primary { color: var(--text-primary) !important; }
+.text-secondary { color: var(--text-secondary) !important; }
+.text-light { color: var(--text-light) !important; }
+.text-muted { color: var(--text-secondary) !important; }
+
+/* Dark mode Bootstrap overrides */
+[data-theme="dark"] .text-muted {
+  color: var(--text-secondary) !important;
+}
+
+[data-theme="dark"] .text-white {
+  color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .bg-light {
+  background-color: var(--bg-secondary) !important;
+}
+
+[data-theme="dark"] .bg-white {
+  background-color: var(--bg-primary) !important;
+}
+
+[data-theme="dark"] .border {
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .border-light {
+  border-color: var(--border-light) !important;
+}
+
+/* Dark mode button and form overrides */
+[data-theme="dark"] .btn-outline-secondary {
+  color: var(--text-secondary);
+  border-color: var(--border-light);
+}
+
+[data-theme="dark"] .btn-outline-secondary:hover,
+[data-theme="dark"] .btn-outline-secondary.active {
+  background-color: var(--border-light);
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .table {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .table td {
+  border-color: var(--border-light);
+}
+
+.text-xl { font-size: 2.25rem}
+.text-lg { font-size: 1.5rem; }
+.text-md { font-size: 1rem; }
+.text-sm { font-size: 0.875rem; }
+.text-xs { font-size: 0.75rem; }
+.text-bold { font-weight: bold; }
 
 .table td,
 .table th,
@@ -148,8 +208,8 @@ body {
   color: var(--primary-green);
 }
 
-/* Navbar Styles */
-.navbar-container {
+/* Topbar Styles */
+.topbar-container {
   height: 88px;
   display: flex;
   align-items: center;
@@ -157,94 +217,146 @@ body {
   border-color: var(--border-light);
 }
 
-.navbar-indicator {
+.topbar-indicator {
   text-align: center;
 }
 
-.navbar-indicator-name {
+.topbar-indicator-name {
   color: var(--text-secondary);
 }
 
-.navbar-indicator-price {
+.topbar-indicator-price {
   color: var(--text-primary);
   font-weight: bold;
 }
 
-.navbar-indicator-positive {
+.topbar-indicator-positive {
   color: var(--success);
 }
 
-.navbar-indicator-negative {
+.topbar-indicator-negative {
   color: var(--danger);
 }
 
-.navbar-separator {
+.topbar-separator {
   height: 40px;
   border-color: var(--border-light);
 }
 
-/* Positions Component Styles */
-.positions-container {
+/* main-block Component Styles */
+.main-block-container {
   height: 100%;
   background-color: var(--bg-primary);
-  padding: 0.75rem;
+  padding: 1rem;
   overflow: hidden;
 }
 
-.positions-portfolio-value {
+.main-block-portfolio-value {
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 0.25rem;
+  color: var(--text-primary);
 }
 
-.positions-after-hours {
+.main-block-after-hours {
   font-size: 0.8rem;
   color: var(--success);
 }
 
-.positions-chart-container {
+.main-block-chart-container {
   height: 180px;
   background-color: var(--bg-secondary);
   position: relative;
 }
 
-.positions-chart-controls .btn {
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
+/* Chart Controls - Tab Style Design */
+.chart-controls-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 2px solid var(--border-light);
+  padding-bottom: 0;
 }
 
-.positions-stats-table {
+.chart-time-buttons {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+}
+
+.chart-time-btn {
+  background: none;
+  border: none;
+  padding: 0.75rem 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  position: relative;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  min-width: 2rem;
+  text-align: center;
+}
+
+.chart-time-btn:hover {
+  color: var(--primary-green);
+  border-bottom-color: var(--primary-green);
+}
+
+.chart-time-btn.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--primary-green);
+  font-weight: 600;
+}
+
+/* Interactive chart button now uses same styling as chart-time-btn */
+
+.main-block-stats-table {
   font-size: 0.75rem;
   background-color: transparent !important;
 }
 
-.positions-stats-table td {
-  padding: 0;
+.main-block-stats-table td {
+  padding: 0.25rem 0;
   color: var(--text-secondary);
   background-color: transparent !important;
+  border-bottom: 1px solid var(--border-light);
 }
 
-.positions-stats-table tbody {
+.main-block-stats-table tbody {
   background-color: transparent !important;
 }
 
-.positions-stats-table tr {
+.main-block-stats-table tr {
   background-color: transparent !important;
 }
 
-.positions-about-text {
+.main-block-stats-table tr:last-child td {
+  border-bottom: none;
+}
+
+.main-block-about-text {
   font-size: 0.65rem;
   line-height: 1.2;
   color: var(--text-secondary);
 }
 
-.positions-section-title {
+.main-block-section-title {
   font-size: 0.9rem;
   font-weight: bold;
   margin-bottom: 0.25rem;
+  color: var(--text-primary);
 }
 
-.positions-action-btn {
+.watchlist-section-title {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.main-block-action-btn {
   font-size: 0.8rem;
   padding: 0.4rem 1.2rem;
   background-color: var(--primary-green);
@@ -254,7 +366,7 @@ body {
   min-width: 80px;
 }
 
-.positions-action-btn:hover {
+.main-block-action-btn:hover {
   background-color: var(--primary-green-dark);
 }
 
@@ -292,6 +404,7 @@ body {
 .watchlist-item-price {
   font-size: 0.85rem;
   font-weight: bold;
+  color: var(--text-primary);
 }
 
 .watchlist-item-price.positive {
@@ -325,9 +438,86 @@ body {
   flex: 0 0 auto;
 }
 
-/* Ensure full height */
+/* Additional component-specific styles */
+
+/* Topbar specific styles */
+.topbar-main {
+  height: 70px;
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-secondary);
+}
+
+.topbar-content {
+  gap: 1.5rem;
+}
+
+.topbar-label {
+  color: var(--text-secondary);
+}
+
+.topbar-value {
+  color: var(--text-primary);
+}
+
+.topbar-positive {
+  color: var(--success);
+}
+
+.topbar-negative {
+  color: var(--danger);
+}
+
+.topbar-separator {
+  width: 1px;
+  height: 40px;
+  background-color: var(--border-light);
+  margin: 0 0.5rem;
+}
+
+/* Sidebar specific styles */
+.sidebar-main {
+  width: 80px;
+  height: 100vh;
+  background-color: var(--bg-sidebar);
+}
+
+.sidebar-logo {
+  width: 40px;
+  height: 40px;
+  background-color: var(--primary-green);
+}
+
+.sidebar-nav-active {
+  color: var(--primary-green);
+}
+
+.sidebar-nav-secondary {
+  color: var(--text-secondary);
+}
+
+/* MainBlock specific styles */
+.main-block-icons {
+  font-size: 0.8rem;
+}
+
+.main-block-chart-svg {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+/* Stats and About separator */
+.stats-about-separator {
+  border-left: 1px solid var(--border-light);
+  padding-left: 1.5rem;
+}
+
+/* Ensure full height and proper colors */
 html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
 }
