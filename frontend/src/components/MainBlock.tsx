@@ -5,26 +5,44 @@ const MainBlock: React.FC = () => {
   return (
     <div className="main-block-container">
       <div className="row mb-2">
-        <div className="col-6">
+        <div className="col-8">
           <h2 className="main-block-portfolio-value text-xl">$1037.40</h2>
+          <div className="main-block-performance">
+            <span className="performance-today text-success">31.96 (+3.18%) Today</span>
+          </div>
           <div className="main-block-after-hours">
             <i className="bi bi-arrow-up"></i>
             <span className="ms-1">0.26 (0.03%) After Hours</span>
           </div>
         </div>
-        <div className="col-6 text-end">
-          <div className="d-flex justify-content-end align-items-center gap-3 main-block-icons">
-            <div>
-              <i className="bi bi-people-fill text-muted"></i>
-              <span className="ms-1 text-muted">25,100</span>
+        <div className="col-4">
+          <div className="stock-info-container">
+            <div className="stock-info mb-2">
+              <div className="stock-symbol">GOOGL</div>
+              <div className="stock-name">Alphabet Inc. Class A Common Stock</div>
             </div>
-            <div>
-              <i className="bi bi-bag-fill text-muted "></i>
-              <span className="ms-1 text-muted">BUY</span>
+            <div className="indicators-and-actions">
+              <div className="main-block-icons">
+                <div>
+                  <i className="bi bi-people-fill text-muted"></i>
+                  <span className="ms-1 text-muted">25,100</span>
+                </div>
+                <div>
+                  <i className="bi bi-bag-fill text-muted"></i>
+                  <span className="ms-1 text-muted">86% BUY</span>
+                </div>
+              </div>
+              <div className="main-block-actions">
+                <button className="action-tab-btn active">NEWS</button>
+                <button className="action-tab-btn">Stock Units</button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      
+      {/* Long horizontal separator */}
+      <div className="main-block-bottom-separator"></div>
 
       {/* Chart - Fixed Small Height */}
       <div className="row mb-2">
@@ -54,7 +72,6 @@ const MainBlock: React.FC = () => {
         </div>
       </div>
 
-      {/* Chart Controls - Very Compact */}
       <div className="row mb-2">
         <div className="col">
           <div className="chart-controls-container">

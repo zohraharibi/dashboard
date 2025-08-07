@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import type { ActiveView } from './Pages/Dashboard';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  activeView: ActiveView;
+  onViewChange: (view: ActiveView) => void;
+  onLogout: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, onLogout }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Load theme from localStorage on component mount
@@ -65,12 +72,22 @@ const Sidebar: React.FC = () => {
           >
             <i className={`bi ${isDarkMode ? 'bi-sun' : 'bi-moon'} fs-5`}></i>
           </button>
-          <a href="#" className="nav-link text-muted mb-3">
-            <i className="bi bi-question-circle fs-5"></i>
-          </a>
-          <a href="#" className="nav-link text-muted">
+          <button 
+            onClick={() => onViewChange(activeView === 'info' ? 'dashboard' : 'info')}
+            className={`nav-link text-muted mb-3 ${activeView === 'info' ? 'sidebar-nav-active' : ''}`}
+            style={{ background: 'none', border: 'none' }}
+            title={activeView === 'info' ? 'Back to Dashboard' : 'View Trading Guide'}
+          >
+            <i className={`bi ${activeView === 'info' ? 'bi-arrow-left' : 'bi-question-circle'} fs-5`}></i>
+          </button>
+          <button 
+            onClick={onLogout}
+            className="nav-link text-muted mb-3"
+            style={{ background: 'none', border: 'none' }}
+            title="Logout"
+          >
             <i className="bi bi-power fs-5"></i>
-          </a>
+          </button>
         </div>
       </div>
     </div>
