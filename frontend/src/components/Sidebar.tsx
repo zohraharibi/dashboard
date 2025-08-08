@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import type { ActiveView } from './Pages/Dashboard';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SidebarProps {
   activeView: ActiveView;
   onViewChange: (view: ActiveView) => void;
-  onLogout: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, onLogout }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
+  const { user, logout } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Load theme from localStorage on component mount
@@ -40,6 +41,21 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, onLogout })
           <i className="bi bi-graph-up text-white"></i>
         </div>
       </div>
+
+      {/* User Profile */}
+      {user && (
+        <div className="px-3 pb-2 text-center">
+          <div className="user-profile-sidebar">
+            <div className="user-avatar">
+              <i className="bi bi-person-circle fs-4 text-muted"></i>
+            </div>
+            <div className="user-info">
+              <div className="user-name">{user.full_name || user.username}</div>
+              <div className="user-email">{user.email}</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Navigation */}
       <nav className="flex-grow-1 py-3">
@@ -81,7 +97,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange, onLogout })
             <i className={`bi ${activeView === 'info' ? 'bi-arrow-left' : 'bi-question-circle'} fs-5`}></i>
           </button>
           <button 
-            onClick={onLogout}
+            onClick={logout}
             className="nav-link text-muted mb-3"
             style={{ background: 'none', border: 'none' }}
             title="Logout"

@@ -1,24 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { handleApiError } from '../../services/api';
 
-interface LoginProps {
-  onLogin: () => void;
-}
-
-const Login: React.FC<LoginProps> = ({ onLogin }) => {
+const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
+  const [signupData, setSignupData] = useState({
+    email: '',
+    username: '',
+    full_name: '',
+    password: '',
+    confirmPassword: '',
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const { login, signup, isLoading, error, clearError } = useAuth();
+
+  // Clear errors when component mounts or form switches
+  useEffect(() => {
+    clearError();
+  }, [showSignup, clearError]);
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    clearError();
     
-    // Simulate login process
-    setTimeout(() => {
-      setIsLoading(false);
-      onLogin();
-    }, 1500);
+    try {
+      await login({ email, password });
+      // Navigation will be handled by ProtectedRoute
+    } catch (error) {
+      // Error is handled by the context
+      console.error('Login failed:', handleApiError(error));
+    }
+  };
+
+  const handleSignupSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    clearError();
+
+    // Validate passwords match
+    if (signupData.password !== signupData.confirmPassword) {
+      // You might want to add a local error state for this
+      alert('Passwords do not match');
+      return;
+    }
+
+    try {
+      await signup({
+        email: signupData.email,
+        username: signupData.username,
+        full_name: signupData.full_name,
+        password: signupData.password,
+      });
+      // Navigation will be handled by ProtectedRoute
+    } catch (error) {
+      // Error is handled by the context
+      console.error('Signup failed:', handleApiError(error));
+    }
   };
 
   return (
@@ -31,63 +69,216 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <i className="bi bi-graph-up"></i>
             </div>
             <h1 className="login-title">Trading Dashboard</h1>
-            <p className="login-subtitle">Sign in to your account</p>
+            <p className="login-subtitle">
+              {showSignup ? 'Create your account' : 'Sign in to your account'}
+            </p>
           </div>
 
+          {/* Error Display */}
+          {error && (
+            <div className="alert alert-danger" role="alert">
+              <i className="bi bi-exclamation-triangle me-2"></i>
+              {error}
+            </div>
+          )}
+
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="login-form">
-            <div className="form-group">
-              <label htmlFor="email" className="form-label">
-                <i className="bi bi-envelope me-2"></i>
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                className="form-control login-input"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                required
-              />
-            </div>
+          {!showSignup ? (
+            <form onSubmit={handleLoginSubmit} className="login-form">
+              <div className="form-group">
+                <label htmlFor="email" className="form-label">
+                  <i className="bi bi-envelope me-2"></i>
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  className="form-control login-input"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
 
-            <div className="form-group">
-              <label htmlFor="password" className="form-label">
-                <i className="bi bi-lock me-2"></i>
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                className="form-control login-input"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                required
-              />
-            </div>
+              <div className="form-group">
+                <label htmlFor="password" className="form-label">
+                  <i className="bi bi-lock me-2"></i>
+                  Password
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  className="form-control login-input"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
 
-            <button
-              type="submit"
-              className="btn login-btn"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                  Signing in...
-                </>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-          </form>
+              <button
+                type="submit"
+                className="btn login-btn"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
+              </button>
+            </form>
+          ) : (
+            /* Signup Form */
+            <form onSubmit={handleSignupSubmit} className="login-form">
+              <div className="row">
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <label htmlFor="signup-email" className="form-label">
+                      <i className="bi bi-envelope me-2"></i>
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      id="signup-email"
+                      className="form-control login-input"
+                      value={signupData.email}
+                      onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
+                      placeholder="Enter your email"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <label htmlFor="username" className="form-label">
+                      <i className="bi bi-person me-2"></i>
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      id="username"
+                      className="form-control login-input"
+                      value={signupData.username}
+                      onChange={(e) => setSignupData({ ...signupData, username: e.target.value })}
+                      placeholder="Choose a username"
+                      required
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+              </div>
 
-          {/* Additional Options */}
+              <div className="form-group">
+                <label htmlFor="full-name" className="form-label">
+                  <i className="bi bi-person-badge me-2"></i>
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  id="full-name"
+                  className="form-control login-input"
+                  value={signupData.full_name}
+                  onChange={(e) => setSignupData({ ...signupData, full_name: e.target.value })}
+                  placeholder="Enter your full name"
+                  required
+                  disabled={isLoading}
+                />
+              </div>
+
+              <div className="row">
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <label htmlFor="signup-password" className="form-label">
+                      <i className="bi bi-lock me-2"></i>
+                      Password
+                    </label>
+                    <input
+                      type="password"
+                      id="signup-password"
+                      className="form-control login-input"
+                      value={signupData.password}
+                      onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                      placeholder="Create a password"
+                      required
+                      disabled={isLoading}
+                      minLength={6}
+                    />
+                  </div>
+                </div>
+                <div className="col-md-6">
+                  <div className="form-group">
+                    <label htmlFor="confirm-password" className="form-label">
+                      <i className="bi bi-lock-fill me-2"></i>
+                      Confirm Password
+                    </label>
+                    <input
+                      type="password"
+                      id="confirm-password"
+                      className="form-control login-input"
+                      value={signupData.confirmPassword}
+                      onChange={(e) => setSignupData({ ...signupData, confirmPassword: e.target.value })}
+                      placeholder="Confirm your password"
+                      required
+                      disabled={isLoading}
+                      minLength={6}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="btn login-btn"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                    Creating account...
+                  </>
+                ) : (
+                  'Create Account'
+                )}
+              </button>
+            </form>
+          )}
+
+          {/* Toggle between Login and Signup */}
           <div className="login-footer">
             <p className="signup-text">
-              Don't have an account? <a href="#" className="signup-link">Sign up</a>
+              {!showSignup ? (
+                <>
+                  Don't have an account?{' '}
+                  <button
+                    type="button"
+                    className="btn-link signup-link"
+                    onClick={() => setShowSignup(true)}
+                    disabled={isLoading}
+                  >
+                    Sign up
+                  </button>
+                </>
+              ) : (
+                <>
+                  Already have an account?{' '}
+                  <button
+                    type="button"
+                    className="btn-link signup-link"
+                    onClick={() => setShowSignup(false)}
+                    disabled={isLoading}
+                  >
+                    Sign in
+                  </button>
+                </>
+              )}
             </p>
           </div>
         </div>
