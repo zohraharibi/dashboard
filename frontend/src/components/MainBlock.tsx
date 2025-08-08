@@ -1,7 +1,32 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import StockDetails from './StockDetails';
+import { useSelectedStock, useWatchlist } from '../store/hooks';
+import { fetchWatchlistItems } from '../store/actions/watchlistActions';
 
 const MainBlock: React.FC = () => {
+  const { selectedStock } = useSelectedStock();
+  const { watchlistItems, dispatch: watchlistDispatch } = useWatchlist();
+
+  // Fetch watchlist data on component mount
+  useEffect(() => {
+    watchlistDispatch(fetchWatchlistItems());
+  }, [watchlistDispatch]);
+
+  // Use selected stock or first item from watchlist, otherwise show empty block
+  const stock = selectedStock || (watchlistItems.length > 0 ? watchlistItems[0].stock : null);
+
+  // If no stock available, show empty block
+  if (!stock) {
+    return (
+      <div className="main-block-container">
+        <div className="text-center text-muted py-5">
+          <h5>No stocks available</h5>
+          <p>Add stocks to your watchlist to get started</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="main-block-container">
       <div className="row mb-2">
@@ -18,8 +43,8 @@ const MainBlock: React.FC = () => {
         <div className="col-4">
           <div className="stock-info-container">
             <div className="stock-info mb-2">
-              <div className="stock-symbol">GOOGL</div>
-              <div className="stock-name">Alphabet Inc. Class A Common Stock</div>
+              <div className="stock-symbol">{stock.symbol}</div>
+              <div className="stock-name">{stock.name}</div>
             </div>
             <div className="indicators-and-actions">
               <div className="main-block-icons">
@@ -88,7 +113,7 @@ const MainBlock: React.FC = () => {
       
       <div className="mb-3"></div>
       
-      <StockDetails />
+      <StockDetails stock={stock} />
 
       <div className="row">
         <div className="col">

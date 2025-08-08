@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import stocksReducer from './reducers/stocksReducer';
 import positionsReducer from './reducers/positionsReducer';
 import watchlistReducer from './reducers/watchlistReducer';
+import selectedStockReducer from './reducers/selectedStockReducer';
 
 // Configure the Redux store
 export const store = configureStore({
@@ -9,6 +10,7 @@ export const store = configureStore({
     stocks: stocksReducer,
     positions: positionsReducer,
     watchlist: watchlistReducer,
+    selectedStock: selectedStockReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

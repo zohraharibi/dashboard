@@ -1,6 +1,11 @@
 import React from 'react';
+import type { Stock } from '../store/types/stockTypes';
 
-const StockDetails: React.FC = () => {
+interface StockDetailsProps {
+  stock: Stock;
+}
+
+const StockDetails: React.FC<StockDetailsProps> = ({ stock }) => {
   return (
     <div>
       <div className="row mb-2">
@@ -34,7 +39,9 @@ const StockDetails: React.FC = () => {
         <div className="col-6 stats-about-separator">
           <h6 className="main-block-section-title">About</h6>
           <div className="text-muted mb-1 main-block-about-text">
-            <p className="mb-1">Alphabet, Inc. is a holding company, which engages in the business of acquisition and operation of different companies. It operates through the Google and Other Bets segments. The Google segment includes its main internet products such as Search, Ads, Commerce, Maps, YouTube, Apps, Cloud, Android, Chrome, Google Play as well as hardware products, such as...</p>
+            <p className="mb-1">
+              {stock.description ? stock.description : 'No description available.'}
+            </p>
           </div>
           <table className="table table-sm table-borderless main-block-stats-table">
             <tbody>

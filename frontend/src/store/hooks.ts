@@ -46,6 +46,17 @@ export const useWatchlist = () => {
   };
 };
 
+export const useSelectedStock = () => {
+  const dispatch = useAppDispatch();
+  const { selectedStock, selectedStockId } = useAppSelector((state) => state.selectedStock);
+
+  return {
+    selectedStock,
+    selectedStockId,
+    dispatch,
+  };
+};
+
 // Combined hook for dashboard usage
 export const useDashboard = () => {
   const stocks = useStocks();

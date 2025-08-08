@@ -6,6 +6,7 @@ export interface Stock {
   sector?: string;
   exchange?: string;
   currency: string;
+  description?: string;
   created_at: string;
   updated_at: string;
 }

@@ -1,19 +1,39 @@
 import React, { useEffect } from 'react';
-import { usePositions, useWatchlist } from '../store/hooks';
+import { usePositions, useWatchlist, useSelectedStock } from '../store/hooks';
 import { fetchPositions } from '../store/actions/positionActions';
 import { fetchWatchlistItems } from '../store/actions/watchlistActions';
+import { setSelectedStock } from '../store/reducers/selectedStockReducer';
+import type { Position } from '../store/types/positionTypes';
+import type { WatchlistItem } from '../store/types/watchlistTypes';
 
 
 const SideBlock: React.FC = () => {
 
   const { positions, dispatch: positionsDispatch } = usePositions();
   const { watchlistItems, dispatch: watchlistDispatch } = useWatchlist();
+  const { dispatch: selectedStockDispatch } = useSelectedStock();
 
   // Fetch data on component mount
   useEffect(() => {
     positionsDispatch(fetchPositions());
     watchlistDispatch(fetchWatchlistItems());
   }, [positionsDispatch, watchlistDispatch]);
+
+  // Handle position item click
+  const handlePositionClick = (position: Position) => {
+    selectedStockDispatch(setSelectedStock({
+      stock: position.stock,
+      stockId: position.stock.id
+    }));
+  };
+
+  // Handle watchlist item click
+  const handleWatchlistClick = (watchlistItem: WatchlistItem) => {
+    selectedStockDispatch(setSelectedStock({
+      stock: watchlistItem.stock,
+      stockId: watchlistItem.stock.id
+    }));
+  };
 
 
   // const positions = [
@@ -39,7 +59,12 @@ const SideBlock: React.FC = () => {
         <h6 className="watchlist-section-title">Positions</h6>
         <div>
           {positions.map((item, index) => (
-            <div key={index} className="watchlist-item">
+            <div 
+              key={index} 
+              className="watchlist-item" 
+              onClick={() => handlePositionClick(item)}
+              style={{ cursor: 'pointer' }}
+            >
               <div className="d-flex justify-content-between align-items-center">
                 <div className="watchlist-item-left d-flex flex-column">
                   <div className="watchlist-item-symbol">{item.stock.symbol}</div>
@@ -73,7 +98,12 @@ const SideBlock: React.FC = () => {
         <h6 className="watchlist-section-title">Watchlist</h6>
         <div>
           {watchlistItems.map((item, index) => (
-            <div key={index} className="watchlist-item">
+            <div 
+              key={index} 
+              className="watchlist-item"
+              onClick={() => handleWatchlistClick(item)}
+              style={{ cursor: 'pointer' }}
+            >
               <div className="d-flex justify-content-between align-items-center">
                 <div className="watchlist-item-left d-flex flex-column">
                   <div className="watchlist-item-symbol">{item.stock.symbol}</div>
