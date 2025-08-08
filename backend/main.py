@@ -4,6 +4,9 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from database import create_tables, test_connection
 from routes.auth import router as auth_router
+from routes.stocks import router as stocks_router
+from routes.positions import router as positions_router
+from routes.watchlist import router as watchlist_router
 import uvicorn
 import logging
 
@@ -63,6 +66,9 @@ async def shutdown_event():
 
 # Include routers
 app.include_router(auth_router)
+app.include_router(stocks_router)
+app.include_router(positions_router)
+app.include_router(watchlist_router)
 
 # Root endpoint
 @app.get("/")
@@ -74,7 +80,13 @@ async def root():
         "status": "running",
         "database": "PostgreSQL",
         "docs": "/docs",
-        "redoc": "/redoc"
+        "redoc": "/redoc",
+        "endpoints": {
+            "auth": "/auth",
+            "stocks": "/stocks",
+            "positions": "/positions",
+            "watchlist": "/watchlist"
+        }
     }
 
 # Health check endpoint

@@ -1,9 +1,10 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Boolean
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from datetime import datetime
 import os
 from dotenv import load_dotenv
+
+# Import all models
+from models import Base, User, Stock, Position, Watchlist
 
 load_dotenv()
 
@@ -16,28 +17,11 @@ engine = create_engine(
     pool_size=10,
     max_overflow=20,
     pool_pre_ping=True,
-    pool_recycle=300
+    pool_recycle=300,
+    connect_args={"sslmode": "require"}
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-# User model
-class User(Base):
-    __tablename__ = "users"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(String(255), unique=True, index=True, nullable=False)
-    username = Column(String(50), unique=True, index=True, nullable=False)
-    full_name = Column(String(100), nullable=True)
-    hashed_password = Column(String(255), nullable=False)
-    is_active = Column(Boolean, default=True, nullable=False)
-    is_verified = Column(Boolean, default=False, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    last_login = Column(DateTime, nullable=True)
-
-    def __repr__(self):
-        return f"<User(id={self.id}, email='{self.email}', username='{self.username}')>"
 
 # Create tables
 def create_tables():
@@ -45,6 +29,7 @@ def create_tables():
     try:
         Base.metadata.create_all(bind=engine)
         print("✅ Database tables created successfully")
+        print("📊 Tables created: users, stocks, positions, watchlist")
     except Exception as e:
         print(f"❌ Error creating database tables: {e}")
 
@@ -61,8 +46,14 @@ def get_db():
 def test_connection():
     """Test database connection."""
     try:
+        # Check if DATABASE_URL is set
+        if not DATABASE_URL:
+            print("❌ DATABASE_URL environment variable not set")
+            return False
+            
         with engine.connect() as connection:
-            result = connection.execute("SELECT 1")
+            from sqlalchemy import text
+            result = connection.execute(text("SELECT 1"))
             print("✅ Database connection successful")
             return True
     except Exception as e:
