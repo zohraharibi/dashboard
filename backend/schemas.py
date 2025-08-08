@@ -79,6 +79,7 @@ class UserUpdate(BaseModel):
 class StockBase(BaseModel):
     symbol: str = Field(..., min_length=1, max_length=10, description="Stock symbol")
     name: str = Field(..., min_length=1, max_length=255, description="Company name")
+    description: Optional[str] = Field(None, max_length=1000, description="Company description")
     sector: Optional[str] = Field(None, max_length=100, description="Business sector")
     exchange: Optional[str] = Field(None, max_length=50, description="Stock exchange")
     currency: str = Field(default="USD", max_length=3, description="Currency")
@@ -100,6 +101,7 @@ class StockResponse(StockBase):
 
 class StockUpdate(BaseModel):
     name: Optional[str] = None
+    description: Optional[str] = Field(None, max_length=1000)
     sector: Optional[str] = None
     exchange: Optional[str] = None
     currency: Optional[str] = None

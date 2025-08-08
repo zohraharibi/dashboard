@@ -29,6 +29,7 @@ class Stock(Base):
     id = Column(Integer, primary_key=True, index=True)
     symbol = Column(String(10), unique=True, index=True, nullable=False)
     name = Column(String(255), nullable=False)
+    description = Column(String(1000), nullable=True)
     sector = Column(String(100), nullable=True)
     exchange = Column(String(50), nullable=True)
     currency = Column(String(3), default="USD", nullable=False)

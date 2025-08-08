@@ -25,6 +25,7 @@ CREATE TABLE stocks (
     id SERIAL PRIMARY KEY,
     symbol VARCHAR(10) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
+    description VARCHAR(1000),
     sector VARCHAR(100),
     exchange VARCHAR(50),
     currency VARCHAR(3) DEFAULT 'USD',
@@ -32,6 +33,15 @@ CREATE TABLE stocks (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
+**Fields:**
+- `id`: Primary key
+- `symbol`: Stock ticker symbol (e.g., 'AAPL', 'GOOGL')
+- `name`: Full company name
+- `description`: Detailed company description (optional, max 1000 chars)
+- `sector`: Business sector (optional)
+- `exchange`: Stock exchange (e.g., 'NASDAQ', 'NYSE')
+- `currency`: Trading currency (default: 'USD')
 
 ### 3. Positions Table
 Tracks user's stock positions (owned shares).
@@ -221,6 +231,7 @@ Users (1) ----< Positions >---- (1) Stocks
 - `id`: Primary key
 - `symbol`: Stock ticker symbol (e.g., AAPL)
 - `name`: Company name
+- `description`: Detailed company description (optional, max 1000 chars)
 - `sector`: Business sector
 - `exchange`: Stock exchange (NASDAQ, NYSE)
 - `currency`: Trading currency

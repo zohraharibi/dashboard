@@ -18,17 +18,17 @@ def init_sample_stocks():
     try:
         # Sample stocks data
         sample_stocks = [
-            {"symbol": "AAPL", "name": "Apple Inc.", "sector": "Technology", "exchange": "NASDAQ"},
-            {"symbol": "GOOGL", "name": "Alphabet Inc. Class A", "sector": "Technology", "exchange": "NASDAQ"},
-            {"symbol": "MSFT", "name": "Microsoft Corporation", "sector": "Technology", "exchange": "NASDAQ"},
-            {"symbol": "TSLA", "name": "Tesla, Inc.", "sector": "Automotive", "exchange": "NASDAQ"},
+            {"symbol": "AAPL", "name": "Apple Inc.", "description": "Technology company that designs, develops, and sells consumer electronics, computer software, and online services.", "sector": "Technology", "exchange": "NASDAQ"},
+            {"symbol": "GOOGL", "name": "Alphabet Inc. Class A", "description": "Multinational technology conglomerate holding company specializing in Internet-related services and products.", "sector": "Technology", "exchange": "NASDAQ"},
+            {"symbol": "MSFT", "name": "Microsoft Corporation", "description": "Multinational technology corporation that produces computer software, consumer electronics, personal computers, and related services.", "sector": "Technology", "exchange": "NASDAQ"},
+            {"symbol": "TSLA", "name": "Tesla, Inc.", "description": "Electric vehicle and clean energy company that designs, manufactures, and sells electric cars, energy storage systems, and solar panels.", "sector": "Automotive", "exchange": "NASDAQ"},
             
-            {"symbol": "AMZN", "name": "Amazon.com, Inc.", "sector": "E-commerce", "exchange": "NASDAQ"},
-            {"symbol": "NVDA", "name": "NVIDIA Corporation", "sector": "Technology", "exchange": "NASDAQ"},
-            {"symbol": "META", "name": "Meta Platforms, Inc.", "sector": "Technology", "exchange": "NASDAQ"},
-            {"symbol": "NFLX", "name": "Netflix, Inc.", "sector": "Entertainment", "exchange": "NASDAQ"},
-            {"symbol": "AMD", "name": "Advanced Micro Devices, Inc.", "sector": "Technology", "exchange": "NASDAQ"},
-            {"symbol": "CRM", "name": "Salesforce, Inc.", "sector": "Technology", "exchange": "NYSE"},
+            {"symbol": "AMZN", "name": "Amazon.com, Inc.", "description": "Multinational technology company focusing on e-commerce, cloud computing, digital streaming, and artificial intelligence.", "sector": "E-commerce", "exchange": "NASDAQ"},
+            {"symbol": "NVDA", "name": "NVIDIA Corporation", "description": "Multinational technology company that designs graphics processing units (GPUs) for gaming, cryptocurrency mining, and professional markets.", "sector": "Technology", "exchange": "NASDAQ"},
+            {"symbol": "META", "name": "Meta Platforms, Inc.", "description": "Technology conglomerate that owns and operates Facebook, Instagram, WhatsApp, and other social media platforms.", "sector": "Technology", "exchange": "NASDAQ"},
+            {"symbol": "NFLX", "name": "Netflix, Inc.", "description": "Streaming entertainment service with over 200 million paid memberships in over 190 countries enjoying TV series, documentaries and feature films.", "sector": "Entertainment", "exchange": "NASDAQ"},
+            {"symbol": "AMD", "name": "Advanced Micro Devices, Inc.", "description": "Multinational semiconductor company that develops computer processors and related technologies for business and consumer markets.", "sector": "Technology", "exchange": "NASDAQ"},
+            {"symbol": "CRM", "name": "Salesforce, Inc.", "description": "Cloud-based software company that provides customer relationship management (CRM) service and enterprise cloud computing.", "sector": "Technology", "exchange": "NYSE"},
         ]
         
         # Check if stocks already exist

@@ -86,6 +86,7 @@ async def create_stock(
     stock = Stock(
         symbol=stock_data.symbol.upper(),
         name=stock_data.name,
+        description=stock_data.description,
         sector=stock_data.sector,
         exchange=stock_data.exchange,
         currency=stock_data.currency
