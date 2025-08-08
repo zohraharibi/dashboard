@@ -22,6 +22,7 @@ def init_sample_stocks():
             {"symbol": "GOOGL", "name": "Alphabet Inc. Class A", "sector": "Technology", "exchange": "NASDAQ"},
             {"symbol": "MSFT", "name": "Microsoft Corporation", "sector": "Technology", "exchange": "NASDAQ"},
             {"symbol": "TSLA", "name": "Tesla, Inc.", "sector": "Automotive", "exchange": "NASDAQ"},
+            
             {"symbol": "AMZN", "name": "Amazon.com, Inc.", "sector": "E-commerce", "exchange": "NASDAQ"},
             {"symbol": "NVDA", "name": "NVIDIA Corporation", "sector": "Technology", "exchange": "NASDAQ"},
             {"symbol": "META", "name": "Meta Platforms, Inc.", "sector": "Technology", "exchange": "NASDAQ"},

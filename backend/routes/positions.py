@@ -68,6 +68,8 @@ async def get_position(
     
     return position
 
+
+# Create/ Buy a new position
 @router.post("/", response_model=PositionResponse)
 async def create_position(
     position_data: PositionCreate,

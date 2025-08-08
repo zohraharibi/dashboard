@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from datetime import timedelta
 from database import get_db
 from schemas import UserCreate, UserLogin, UserResponse, Token, MessageResponse, ErrorResponse
-from auth import authenticate_user, get_current_active_user, create_user_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from auth import authenticate_user, get_current_user, create_user_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from user_service import UserService
 from pydantic import ValidationError
 
@@ -46,12 +46,6 @@ async def login_user(user_credentials: UserLogin, db: Session = Depends(get_db))
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
-        if not user.is_active:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Account is deactivated. Please contact support."
-            )
-        
         # Update last login
         UserService.update_last_login(db, user.id)
         
@@ -71,12 +65,12 @@ async def login_user(user_credentials: UserLogin, db: Session = Depends(get_db))
         )
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user_info(current_user = Depends(get_current_active_user)):
+async def get_current_user_info(current_user = Depends(get_current_user)):
     """Get current authenticated user information."""
     return current_user
 
 @router.post("/logout", response_model=MessageResponse)
-async def logout_user(current_user = Depends(get_current_active_user)):
+async def logout_user(current_user = Depends(get_current_user)):
     """Logout user (client should remove token from storage)."""
     print(f"✅ User logged out: {current_user.email}")
     return MessageResponse(
@@ -86,12 +80,12 @@ async def logout_user(current_user = Depends(get_current_active_user)):
     )
 
 @router.post("/verify-token", response_model=UserResponse)
-async def verify_token(current_user = Depends(get_current_active_user)):
+async def verify_token(current_user = Depends(get_current_user)):
     """Verify if the current token is valid and return user info."""
     return current_user
 
 @router.post("/refresh-token", response_model=Token)
-async def refresh_token(current_user = Depends(get_current_active_user), db: Session = Depends(get_db)):
+async def refresh_token(current_user = Depends(get_current_user), db: Session = Depends(get_db)):
     """Refresh the access token for the current user."""
     try:
         # Update last login
@@ -112,13 +106,13 @@ async def refresh_token(current_user = Depends(get_current_active_user), db: Ses
 
 # Additional user management endpoints (optional)
 @router.get("/users/me/profile", response_model=UserResponse)
-async def get_user_profile(current_user = Depends(get_current_active_user)):
+async def get_user_profile(current_user = Depends(get_current_user)):
     """Get detailed user profile information."""
     return current_user
 
 @router.post("/users/me/deactivate", response_model=MessageResponse)
 async def deactivate_own_account(
-    current_user = Depends(get_current_active_user),
+    current_user = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Allow user to deactivate their own account."""
