@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Path
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, timedelta
 from database import get_db
 from models import Stock, User
 from schemas import StockCreate, StockResponse, StockUpdate, MessageResponse, StockQuoteResponse
@@ -62,6 +62,45 @@ async def get_stock_by_symbol(
         )
     return stock
 
+@router.get("/chart/{symbol}/{timeframe}")
+async def get_stock_chart_svg(
+    symbol: str,
+    timeframe: str = Path(..., regex="^(1D|1W|1Y|5Y)$"),
+    db: Session = Depends(get_db),
+):
+    """Returns chart data in SVG points format (x,y x,y x,y)"""
+    # Verify stock exists
+    stock = db.query(Stock).filter(Stock.symbol == symbol.upper()).first()
+    if not stock:
+        raise HTTPException(status_code=404, detail="Stock not found")
+
+    # Configure timeframe
+    timeframe_config = {
+        "1D": {"points": 24, "x_step": 20},  # 24 points, 20px apart
+        "1W": {"points": 28, "x_step": 20},  # 28 points (4 weeks)
+        "1Y": {"points": 12, "x_step": 30},  # 12 months
+        "5Y": {"points": 5, "x_step": 50}    # 5 years
+    }
+    
+    config = timeframe_config.get(timeframe)
+    
+    # Generate descending values (example: 130 down to 30)
+    start_value = 130
+    end_value = 30
+    value_step = (start_value - end_value) / (config["points"] - 1)
+    
+    points = []
+    for i in range(config["points"]):
+        x = i * config["x_step"]
+        y = start_value - (i * value_step)
+        points.append(f"{x},{round(y,1)}")
+    
+    return {
+        "symbol": symbol.upper(),
+        "timeframe": timeframe,
+        "points": " ".join(points),
+        "viewBox": f"0 0 {config['points'] * config['x_step']} 150"
+    }
 @router.get("/{stock_id}", response_model=StockResponse)
 async def get_stock(
     stock_id: int,
@@ -250,3 +289,4 @@ async def get_stock_profile(
     
     # You might want to update your database with some of this info
     return profile_data
+
