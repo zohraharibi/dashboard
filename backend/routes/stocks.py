@@ -14,7 +14,7 @@ import random
 router = APIRouter(prefix="/stocks", tags=["stocks"])
 
 # FinnHub configuration
-FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY", "d2b6v1hr01qrj4ikm0p0d2b6v1hr01qrj4ikm0pg")
+FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
 if not FINNHUB_API_KEY:
     raise ValueError("FINNHUB_API_KEY not found in environment variables")
 
