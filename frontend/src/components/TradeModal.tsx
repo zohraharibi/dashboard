@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 interface TradeModalProps {
   show: boolean;
   onHide: () => void;
-  onConfirm: (quantity: number) => void;
+  onConfirm: (quantity: number) => Promise<{ success: boolean; message: string }>;
   tradeType: 'buy' | 'sell';
   stockSymbol: string;
   currentPrice: number;
@@ -21,6 +21,8 @@ const TradeModal: React.FC<TradeModalProps> = ({
 }) => {
   const [quantity, setQuantity] = useState<number>(1);
   const [error, setError] = useState<string>('');
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | null; text: string }>({ type: null, text: '' });
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
@@ -32,19 +34,42 @@ const TradeModal: React.FC<TradeModalProps> = ({
     }
   };
 
-  const handleConfirm = () => {
-    if (quantity > 0) {
-      onConfirm(quantity);
-      setQuantity(1);
-      setError('');
-    } else {
+  const handleConfirm = async () => {
+    if (quantity <= 0) {
       setError('Please enter a valid quantity');
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      setError('');
+      setMessage({ type: null, text: '' });
+      
+      const result = await onConfirm(quantity);
+      
+      if (result.success) {
+        setMessage({ type: 'success', text: result.message });
+        // Reset form after successful trade
+        setTimeout(() => {
+          setQuantity(1);
+          setError('');
+          setMessage({ type: null, text: '' });
+          onHide();
+        }, 2000); // Close modal after 2 seconds
+      } else {
+        setMessage({ type: 'error', text: result.message });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'An unexpected error occurred' });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const handleClose = () => {
     setQuantity(1);
     setError('');
+    setMessage({ type: null, text: '' });
     onHide();
   };
 
@@ -110,21 +135,31 @@ const TradeModal: React.FC<TradeModalProps> = ({
           </div>
         </div>
 
+        {/* Message Display */}
+        {message.type && (
+          <div className={`trade-message ${message.type === 'success' ? 'trade-message-success' : 'trade-message-error'}`}>
+            <div className="d-flex align-items-center">
+              <i className={`bi ${message.type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2`}></i>
+              <span>{message.text}</span>
+            </div>
+          </div>
+        )}
+
         {/* Modal Footer */}
         <div className="trade-modal-footer">
           <button 
             className="btn trade-btn-cancel"
             onClick={handleClose} 
-            disabled={isLoading}
+            disabled={isLoading || isProcessing}
           >
             Cancel
           </button>
           <button 
             className="btn trade-btn-confirm"
             onClick={handleConfirm}
-            disabled={isLoading || !!error || quantity <= 0}
+            disabled={isLoading || isProcessing || !!error || quantity <= 0}
           >
-            {isLoading ? (
+            {(isLoading || isProcessing) ? (
               <>
                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                 Processing...

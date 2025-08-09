@@ -202,7 +202,7 @@ export const buyShares = createAsyncThunk<Position, BuySharesRequest>(
   'positions/buyShares',
   async ({ stockId, quantity, purchasePrice }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/positions/buy`, {
+      const response = await fetch(`${API_BASE_URL}/positions`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -231,13 +231,9 @@ export const sellShares = createAsyncThunk<{ positionId: number; remainingPositi
   'positions/sellShares',
   async ({ positionId, quantity }, { rejectWithValue }) => {
     try {
-      const response = await fetch(`${API_BASE_URL}/positions/sell`, {
+      const response = await fetch(`${API_BASE_URL}/positions/${positionId}/sell?quantity=${quantity}`, {
         method: 'POST',
         headers: getAuthHeaders(),
-        body: JSON.stringify({
-          position_id: positionId,
-          quantity,
-        }),
       });
 
       if (!response.ok) {
@@ -248,7 +244,7 @@ export const sellShares = createAsyncThunk<{ positionId: number; remainingPositi
       const result = await response.json();
       return {
         positionId,
-        remainingPosition: result.remaining_position || null,
+        remainingPosition: result.message ? null : result, // If message exists, position was deleted
       };
     } catch (error) {
       if (error instanceof ApiError) {

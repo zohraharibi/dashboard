@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
-import StockDetails from './StockDetails';
-import { useSelectedStock, useWatchlist, useStocks } from '../store/hooks';
-import { fetchWatchlistItems } from '../store/actions/watchlistActions';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useSelectedStock, useStocks, usePositions, useWatchlist } from '../store/hooks';
 import { getStockQuote, getStockProfile, getStockChart } from '../store/actions/stockActions';
+import { buyShares, sellShares, fetchPositions } from '../store/actions/positionActions';
+import { fetchWatchlistItems, addToWatchlist, removeFromWatchlist } from '../store/actions/watchlistActions';
+import TradeModal from './TradeModal';
 
 const MainBlock: React.FC = () => {
   const { selectedStock } = useSelectedStock();
-  const { watchlistItems, dispatch: watchlistDispatch } = useWatchlist();
   const { 
     currentQuote, 
     currentProfile, 
@@ -16,8 +16,13 @@ const MainBlock: React.FC = () => {
     isChartLoading, 
     dispatch: stocksDispatch 
   } = useStocks();
+  const { positions, dispatch: positionsDispatch } = usePositions();
+  const { watchlistItems, dispatch: watchlistDispatch } = useWatchlist();
   
   const [selectedTimeframe, setSelectedTimeframe] = useState('1Y');
+  const [showTradeModal, setShowTradeModal] = useState(false);
+  const [tradeType, setTradeType] = useState<'buy' | 'sell'>('buy');
+  const [isTradeLoading, setIsTradeLoading] = useState(false);
 
   // Fetch watchlist data on component mount
   useEffect(() => {
@@ -39,6 +44,110 @@ const MainBlock: React.FC = () => {
   // Handle timeframe change
   const handleTimeframeChange = (timeframe: string) => {
     setSelectedTimeframe(timeframe);
+  };
+
+  // Find current position for the selected stock
+  const currentPosition = useMemo(() => {
+    return positions.find(pos => pos.stock.id === stock?.id);
+  }, [positions, stock?.id]);
+
+  // Find current watchlist item for the selected stock
+  const currentWatchlistItem = useMemo(() => {
+    return watchlistItems.find(item => item.stock.id === stock?.id);
+  }, [watchlistItems, stock?.id]);
+
+  // Determine if stock is in positions or watchlist
+  const isInPositions = !!currentPosition;
+  const isInWatchlist = !!currentWatchlistItem;
+
+  // Handle buy button click
+  const handleBuyClick = () => {
+    setTradeType('buy');
+    setShowTradeModal(true);
+  };
+
+  // Handle sell button click
+  const handleSellClick = () => {
+    if (!isInPositions) {
+      alert('You cannot sell a stock you don\'t own!');
+      return;
+    }
+    setTradeType('sell');
+    setShowTradeModal(true);
+  };
+
+  // Handle trade confirmation
+  const handleTradeConfirm = async (quantity: number): Promise<{ success: boolean; message: string }> => {
+    if (!stock) {
+      return { success: false, message: 'No stock selected' };
+    }
+
+    try {
+      setIsTradeLoading(true);
+
+      if (tradeType === 'buy') {
+        // Buy shares logic
+        await positionsDispatch(buyShares({
+          stockId: stock.id,
+          quantity,
+          purchasePrice: currentQuote?.current_price || 100
+        })).unwrap();
+
+        // If buying from watchlist, remove from watchlist
+        if (isInWatchlist && currentWatchlistItem) {
+          await watchlistDispatch(removeFromWatchlist(currentWatchlistItem.id));
+        }
+
+        // Refresh positions to get updated data
+        await positionsDispatch(fetchPositions());
+
+        return { 
+          success: true, 
+          message: `Successfully bought ${quantity} share${quantity !== 1 ? 's' : ''} of ${stock.symbol}!` 
+        };
+      } else {
+        // Sell shares logic
+        if (!currentPosition) {
+          return { success: false, message: 'You don\'t own this stock!' };
+        }
+
+        if (quantity > currentPosition.quantity) {
+          return { 
+            success: false, 
+            message: `You can only sell up to ${currentPosition.quantity} share${currentPosition.quantity !== 1 ? 's' : ''}!` 
+          };
+        }
+
+        await positionsDispatch(sellShares({
+          positionId: currentPosition.id,
+          quantity
+        })).unwrap();
+
+        // If selling all shares, add to watchlist
+        if (quantity === currentPosition.quantity) {
+          await watchlistDispatch(addToWatchlist({
+            stock_id: stock.id,
+            notes: `Previously owned ${currentPosition.quantity} shares`
+          }));
+        }
+
+        // Refresh positions to get updated quantities
+        await positionsDispatch(fetchPositions());
+
+        return { 
+          success: true, 
+          message: `Successfully sold ${quantity} share${quantity !== 1 ? 's' : ''} of ${stock.symbol}!` 
+        };
+      }
+    } catch (error: any) {
+      console.error('Trade failed:', error);
+      return { 
+        success: false, 
+        message: `Trade failed: ${error.message || 'Unknown error'}` 
+      };
+    } finally {
+      setIsTradeLoading(false);
+    }
   };
 
 
@@ -189,22 +298,99 @@ const MainBlock: React.FC = () => {
       
       <div className="mb-3"></div>
       
-      <StockDetails 
-        stock={stock} 
-        quote={currentQuote} 
-        profile={currentProfile}
-        isQuoteLoading={isQuoteLoading} 
-        isProfileLoading={isProfileLoading}
-      />
+      {/* Stock Details Section */}
+      <div className="row">
+        <div className="col">
+          <div className="main-block-stats-container">
+            <div className="row">
+              <div className="col-6">
+                <div className="main-block-section-title">STATS</div>
+                <table className="table table-sm main-block-stats-table">
+                  <tbody>
+                    <tr>
+                      <td>Open</td>
+                      <td className="text-end">{currentQuote?.current_price || '—'}</td>
+                    </tr>
+                    <tr>
+                      <td>High</td>
+                      <td className="text-end">{currentQuote?.current_price || '—'}</td>
+                    </tr>
+                    <tr>
+                      <td>Low</td>
+                      <td className="text-end">{currentQuote?.current_price || '—'}</td>
+                    </tr>
+                    <tr>
+                      <td>Volume</td>
+                      <td className="text-end">{'—'}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div className="col-6 stats-about-separator">
+                <div className="main-block-section-title">ABOUT</div>
+                <table className="table table-sm main-block-stats-table">
+                  <tbody>
+                    <tr>
+                      <td>Market Cap</td>
+                      <td className="text-end">{currentProfile?.name || '—'}</td>
+                    </tr>
+                    <tr>
+                      <td>P/E Ratio</td>
+                      <td className="text-end">{'—'}</td>
+                    </tr>
+                    <tr>
+                      <td>52W High</td>
+                      <td className="text-end">{'—'}</td>
+                    </tr>
+                    <tr>
+                      <td>52W Low</td>
+                      <td className="text-end">{'—'}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
 
       <div className="row">
         <div className="col">
           <div className="d-flex justify-content-end gap-2">
-            <button className="btn px-5 main-block-action-btn">SELL</button>
-            <button className="btn px-5 main-block-action-btn">BUY</button>
+            <button 
+              className={`btn px-5 main-block-action-btn ${!isInPositions ? 'disabled' : ''}`}
+              onClick={handleSellClick}
+              disabled={!isInPositions}
+              title={!isInPositions ? 'You must own this stock to sell it' : `Sell ${currentPosition?.quantity || 0} shares`}
+            >
+              SELL
+            </button>
+            <button 
+              className="btn px-5 main-block-action-btn"
+              onClick={handleBuyClick}
+              title="Buy shares of this stock"
+            >
+              BUY
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Trade Modal */}
+      {showTradeModal && stock && (
+        <TradeModal
+          show={showTradeModal}
+          onHide={() => setShowTradeModal(false)}
+          onConfirm={handleTradeConfirm}
+          tradeType={tradeType}
+          stockSymbol={stock.symbol}
+          currentPrice={100} // Use real price from stock quote
+          isLoading={isTradeLoading}
+
+        />
+      )}
     </div>
   );
 };
