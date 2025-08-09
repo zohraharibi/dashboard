@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
-import { usePositions, useWatchlist, useSelectedStock } from '../store/hooks';
+import React, { useEffect, useState } from 'react';
+import { usePositions, useWatchlist, useSelectedStock, useStocks } from '../store/hooks';
 import { fetchPositions } from '../store/actions/positionActions';
 import { fetchWatchlistItems } from '../store/actions/watchlistActions';
+import { getStockChart } from '../store/actions/stockActions';
 import { setSelectedStock } from '../store/reducers/selectedStockReducer';
 import type { Position } from '../store/types/positionTypes';
 import type { WatchlistItem } from '../store/types/watchlistTypes';
+import type { ChartData } from '../store/types/stockTypes';
 
 
 const SideBlock: React.FC = () => {
@@ -12,12 +14,47 @@ const SideBlock: React.FC = () => {
   const { positions, dispatch: positionsDispatch } = usePositions();
   const { watchlistItems, dispatch: watchlistDispatch } = useWatchlist();
   const { dispatch: selectedStockDispatch } = useSelectedStock();
+  const { dispatch: stocksDispatch } = useStocks();
+  
+  // State to store chart data for each stock symbol
+  const [chartData, setChartData] = useState<Record<string, ChartData>>({});
+  
+  // Add debugging
+  console.log('Current chart data:', chartData);
 
   // Fetch data on component mount
   useEffect(() => {
     positionsDispatch(fetchPositions());
     watchlistDispatch(fetchWatchlistItems());
   }, [positionsDispatch, watchlistDispatch]);
+
+  // Fetch chart data for all stocks (1Y timeframe)
+  useEffect(() => {
+    const allSymbols = new Set<string>();
+    
+    // Collect all unique symbols from positions and watchlist
+    positions.forEach(position => allSymbols.add(position.stock.symbol));
+    watchlistItems.forEach(item => allSymbols.add(item.stock.symbol));
+    
+    // Fetch 1Y chart data for each symbol
+    allSymbols.forEach(async (symbol) => {
+      try {
+        console.log(`Fetching chart data for ${symbol}`);
+        const result = await stocksDispatch(getStockChart({ symbol, timeframe: '1Y' }));
+        if (getStockChart.fulfilled.match(result)) {
+          console.log(`Chart data received for ${symbol}:`, result.payload);
+          setChartData(prev => ({
+            ...prev,
+            [symbol]: result.payload
+          }));
+        } else {
+          console.log(`Chart fetch failed for ${symbol}:`, result);
+        }
+      } catch (error) {
+        console.error(`Failed to fetch chart for ${symbol}:`, error);
+      }
+    });
+  }, [positions, watchlistItems, stocksDispatch]);
 
   // Handle position item click
   const handlePositionClick = (position: Position) => {
@@ -33,6 +70,24 @@ const SideBlock: React.FC = () => {
       stock: watchlistItem.stock,
       stockId: watchlistItem.stock.id
     }));
+  };
+
+  // Helper function to scale chart points for mini charts
+  const scaleChartPoints = (points: string, targetWidth: number = 60, targetHeight: number = 20): string => {
+    try {
+      const pointPairs = points.split(' ');
+      const scaledPoints = pointPairs.map(point => {
+        const [x, y] = point.split(',').map(Number);
+        // Scale x to fit in targetWidth, scale y to fit in targetHeight
+        const scaledX = (x / 360) * targetWidth; // Assuming original width ~360
+        const scaledY = (y / 150) * targetHeight; // Assuming original height ~150
+        return `${scaledX.toFixed(1)},${scaledY.toFixed(1)}`;
+      });
+      return scaledPoints.join(' ');
+    } catch (error) {
+      console.error('Error scaling chart points:', error);
+      return "0,18 10,15 20,12 30,8 40,6 50,3"; // fallback
+    }
   };
 
 
@@ -70,18 +125,29 @@ const SideBlock: React.FC = () => {
                   <div className="watchlist-item-symbol">{item.stock.symbol}</div>
                   <small className="watchlist-item-label">{item.quantity} SHARES</small>
                 </div>
-                {/* <div className="watchlist-item-center d-flex align-items-center">
+                <div className="watchlist-item-center d-flex align-items-center">
                   <div className="watchlist-chart">
-                    <svg width="100%" height="20" className="position-absolute">
-                      <polyline
-                        fill="none"
-                        stroke={ "var(--chart-positive)"}
-                        strokeWidth="1.5"
-                        points={"0,18 20,15 40,12 60,8 80,6 100,3"}
-                      />
+                    <svg width="60" height="20" className="position-relative">
+                      {chartData[item.stock.symbol] ? (
+                        <polyline
+                          fill="none"
+                          stroke="var(--chart-positive)"
+                          strokeWidth="1.5"
+                          points={chartData[item.stock.symbol].points}
+                          vectorEffect="non-scaling-stroke"
+                          transform="scale(0.6, 1)"
+                        />
+                      ) : (
+                        <polyline
+                          fill="none"
+                          stroke="var(--chart-positive)"
+                          strokeWidth="1.5"
+                          points="0,18 10,15 20,12 30,8 40,6 50,3"
+                        />
+                      )}
                     </svg>
                   </div>
-                </div> */}
+                </div>
                 <div className="watchlist-item-right text-end">
                   <div className={`watchlist-item-price positive`}>
                     {item.total_value}
@@ -109,18 +175,29 @@ const SideBlock: React.FC = () => {
                   <div className="watchlist-item-symbol">{item.stock.symbol}</div>
                   <small className="watchlist-item-label">Watchlist</small>
                 </div>
-                {/* <div className="watchlist-item-center d-flex align-items-center">
+                <div className="watchlist-item-center d-flex align-items-center">
                   <div className="watchlist-chart">
-                    <svg width="100%" height="20" className="position-absolute">
-                      <polyline
-                        fill="none"
-                        stroke={item.positive ? "var(--chart-positive)" : "var(--chart-negative)"}
-                        strokeWidth="1.5"
-                        points={item.positive ? "0,18 20,15 40,12 60,8 80,6 100,3" : "0,3 20,6 40,9 60,12 80,15 100,18"}
-                      />
+                    <svg width="60" height="20" className="position-relative">
+                      {chartData[item.stock.symbol] ? (
+                        <polyline
+                          fill="none"
+                          stroke="var(--chart-positive)"
+                          strokeWidth="1.5"
+                          points={chartData[item.stock.symbol].points}
+                          vectorEffect="non-scaling-stroke"
+                          transform="scale(0.6, 1)"
+                        />
+                      ) : (
+                        <polyline
+                          fill="none"
+                          stroke="var(--chart-positive)"
+                          strokeWidth="1.5"
+                          points="0,18 10,15 20,12 30,8 40,6 50,3"
+                        />
+                      )}
                     </svg>
                   </div>
-                </div> */}
+                </div>
                 <div className="watchlist-item-right text-end">
                   <div className={`watchlist-item-price positive`}>
                     100

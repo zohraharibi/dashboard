@@ -67,10 +67,51 @@ export interface StockResponse {
   updated_at: string;
 }
 
+// Finnhub API types
+export interface StockQuote {
+  current_price: number;
+  change: number;
+  percent_change: number;
+  high_price: number;
+  low_price: number;
+  open_price: number;
+  previous_close: number;
+  direction: 'up' | 'down' | 'neutral';
+  last_updated: string;
+}
+
+export interface StockProfile {
+  country: string;
+  currency: string;
+  exchange: string;
+  ipo: string;
+  marketCapitalization: number;
+  name: string;
+  phone: string;
+  shareOutstanding: number;
+  ticker: string;
+  weburl: string;
+  logo: string;
+  finnhubIndustry: string;
+}
+
+export interface ChartData {
+  symbol: string;
+  timeframe: string;
+  points: string;
+  viewBox: string;
+}
+
 // Redux state type
 export interface StocksState {
   stocks: Stock[];
   currentStock: Stock | null;
+  currentQuote: StockQuote | null;
+  currentProfile: StockProfile | null;
+  currentChart: ChartData | null;
   isLoading: boolean;
+  isQuoteLoading: boolean;
+  isProfileLoading: boolean;
+  isChartLoading: boolean;
   error: string | null;
 }

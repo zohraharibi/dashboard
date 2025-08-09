@@ -9,12 +9,29 @@ export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 // Custom hooks for each slice
 export const useStocks = () => {
   const dispatch = useAppDispatch();
-  const { stocks, currentStock, isLoading, error } = useAppSelector((state) => state.stocks);
+  const { 
+    stocks, 
+    currentStock, 
+    currentQuote, 
+    currentProfile, 
+    currentChart, 
+    isLoading, 
+    isQuoteLoading, 
+    isProfileLoading, 
+    isChartLoading, 
+    error 
+  } = useAppSelector((state) => state.stocks);
 
   return {
     stocks,
     currentStock,
+    currentQuote,
+    currentProfile,
+    currentChart,
     isLoading,
+    isQuoteLoading,
+    isProfileLoading,
+    isChartLoading,
     error,
     dispatch,
   };

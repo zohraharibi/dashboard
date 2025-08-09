@@ -1,11 +1,15 @@
 import React from 'react';
-import type { Stock } from '../store/types/stockTypes';
+import type { Stock, StockQuote, StockProfile } from '../store/types/stockTypes';
 
 interface StockDetailsProps {
   stock: Stock;
+  quote?: StockQuote | null;
+  profile?: StockProfile | null;
+  isQuoteLoading?: boolean;
+  isProfileLoading?: boolean;
 }
 
-const StockDetails: React.FC<StockDetailsProps> = ({ stock }) => {
+const StockDetails: React.FC<StockDetailsProps> = ({ stock, quote, profile, isQuoteLoading, isProfileLoading }) => {
   return (
     <div>
       <div className="row mb-2">
@@ -15,23 +19,33 @@ const StockDetails: React.FC<StockDetailsProps> = ({ stock }) => {
             <tbody>
               <tr>
                 <td className="text-muted ps-0">OPEN</td>
-                <td className="text-end pe-0">1010.55</td>
+                <td className="text-end pe-0">
+                  {isQuoteLoading ? 'Loading...' : quote ? `$${quote.open_price.toFixed(2)}` : '1010.55'}
+                </td>
               </tr>
               <tr>
                 <td className="text-muted ps-0">HIGH</td>
-                <td className="text-end pe-0">1048.00</td>
+                <td className="text-end pe-0">
+                  {isQuoteLoading ? 'Loading...' : quote ? `$${quote.high_price.toFixed(2)}` : '1048.00'}
+                </td>
               </tr>
               <tr>
                 <td className="text-muted ps-0">LOW</td>
-                <td className="text-end pe-0">1004.04</td>
+                <td className="text-end pe-0">
+                  {isQuoteLoading ? 'Loading...' : quote ? `$${quote.low_price.toFixed(2)}` : '1004.04'}
+                </td>
               </tr>
               <tr>
                 <td className="text-muted ps-0">VOLUME</td>
-                <td className="text-end pe-0">1.19M</td>
+                <td className="text-end pe-0">
+                  {isQuoteLoading ? 'Loading...' : 'N/A'}
+                </td>
               </tr>
               <tr>
                 <td className="text-muted ps-0">AVG VOLUME</td>
-                <td className="text-end pe-0">1.75M</td>
+                <td className="text-end pe-0">
+                  {isQuoteLoading ? 'Loading...' : 'N/A'}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -47,23 +61,34 @@ const StockDetails: React.FC<StockDetailsProps> = ({ stock }) => {
             <tbody>
               <tr>
                 <td className="text-muted ps-0">52 WK HIGH</td>
-                <td className="text-end pe-0">1198.00</td>
+                <td className="text-end pe-0">
+                  {isProfileLoading ? 'Loading...' : 'N/A'}
+                </td>
               </tr>
               <tr>
                 <td className="text-muted ps-0">52 WK LOW</td>
-                <td className="text-end pe-0">N/A</td>
+                <td className="text-end pe-0">
+                  {isProfileLoading ? 'Loading...' : 'N/A'}
+                </td>
               </tr>
               <tr>
                 <td className="text-muted ps-0">DIVIDEND</td>
-                <td className="text-end pe-0">$34.60</td>
+                <td className="text-end pe-0">
+                  {isProfileLoading ? 'Loading...' : 'N/A'}
+                </td>
               </tr>
               <tr>
                 <td className="text-muted ps-0">MKT CAP</td>
-                <td className="text-end pe-0">720.59B</td>
+                <td className="text-end pe-0">
+                  {isProfileLoading ? 'Loading...' : profile ? 
+                    `${(profile.marketCapitalization / 1000).toFixed(2)}B` : '720.59B'}
+                </td>
               </tr>
               <tr>
                 <td className="text-muted ps-0">P/E RATIO</td>
-                <td className="text-end pe-0">57.74</td>
+                <td className="text-end pe-0">
+                  {isProfileLoading ? 'Loading...' : 'N/A'}
+                </td>
               </tr>
             </tbody>
           </table>

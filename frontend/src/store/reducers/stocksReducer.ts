@@ -7,14 +7,23 @@ import {
   getStockBySymbol,
   createStock,
   updateStock,
-  deleteStock
+  deleteStock,
+  getStockQuote,
+  getStockProfile,
+  getStockChart
 } from '../actions/stockActions';
 
 // Initial state
 const initialState: StocksState = {
   stocks: [],
   currentStock: null,
+  currentQuote: null,
+  currentProfile: null,
+  currentChart: null,
   isLoading: false,
+  isQuoteLoading: false,
+  isProfileLoading: false,
+  isChartLoading: false,
   error: null,
 };
 
@@ -26,6 +35,15 @@ const stocksSlice = createSlice({
     // Synchronous reducers
     clearCurrentStock: (state) => {
       state.currentStock = null;
+    },
+    clearCurrentQuote: (state) => {
+      state.currentQuote = null;
+    },
+    clearCurrentProfile: (state) => {
+      state.currentProfile = null;
+    },
+    clearCurrentChart: (state) => {
+      state.currentChart = null;
     },
     clearError: (state) => {
       state.error = null;
@@ -155,9 +173,64 @@ const stocksSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload as string;
       });
+
+    // Get stock quote (Finnhub)
+    builder
+      .addCase(getStockQuote.pending, (state) => {
+        state.isQuoteLoading = true;
+        state.error = null;
+      })
+      .addCase(getStockQuote.fulfilled, (state, action) => {
+        state.isQuoteLoading = false;
+        state.currentQuote = action.payload;
+        state.error = null;
+      })
+      .addCase(getStockQuote.rejected, (state, action) => {
+        state.isQuoteLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Get stock profile (Finnhub)
+    builder
+      .addCase(getStockProfile.pending, (state) => {
+        state.isProfileLoading = true;
+        state.error = null;
+      })
+      .addCase(getStockProfile.fulfilled, (state, action) => {
+        state.isProfileLoading = false;
+        state.currentProfile = action.payload;
+        state.error = null;
+      })
+      .addCase(getStockProfile.rejected, (state, action) => {
+        state.isProfileLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Get stock chart
+    builder
+      .addCase(getStockChart.pending, (state) => {
+        state.isChartLoading = true;
+        state.error = null;
+      })
+      .addCase(getStockChart.fulfilled, (state, action) => {
+        state.isChartLoading = false;
+        state.currentChart = action.payload;
+        state.error = null;
+      })
+      .addCase(getStockChart.rejected, (state, action) => {
+        state.isChartLoading = false;
+        state.error = action.payload as string;
+      });
   },
 });
 
 // Export actions and reducer
-export const { clearCurrentStock, clearError, setLoading } = stocksSlice.actions;
+export const { 
+  clearCurrentStock, 
+  clearCurrentQuote, 
+  clearCurrentProfile, 
+  clearCurrentChart, 
+  clearError, 
+  setLoading 
+} = stocksSlice.actions;
 export default stocksSlice.reducer;

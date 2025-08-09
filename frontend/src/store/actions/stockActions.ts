@@ -3,7 +3,10 @@ import type {
   Stock, 
   CreateStockRequest, 
   UpdateStockRequest, 
-  SearchStocksRequest 
+  SearchStocksRequest,
+  StockQuote,
+  StockProfile,
+  ChartData
 } from '../types/stockTypes';
 
 // API base URL - should match your backend
@@ -187,6 +190,79 @@ export const deleteStock = createAsyncThunk<number, number>(
       }
 
       return id;
+    } catch (error) {
+      if (error instanceof ApiError) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Network error occurred');
+    }
+  }
+);
+
+// Finnhub API actions
+export const getStockQuote = createAsyncThunk<StockQuote, string>(
+  'stocks/getStockQuote',
+  async (symbol, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/stocks/${symbol}/quote`, {
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new ApiError(errorData.detail || 'Failed to get stock quote', response.status);
+      }
+
+      return await response.json();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Network error occurred');
+    }
+  }
+);
+
+export const getStockProfile = createAsyncThunk<StockProfile, string>(
+  'stocks/getStockProfile',
+  async (symbol, { rejectWithValue }) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/stocks/${symbol}/profile`, {
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new ApiError(errorData.detail || 'Failed to get stock profile', response.status);
+      }
+
+      return await response.json();
+    } catch (error) {
+      if (error instanceof ApiError) {
+        return rejectWithValue(error.message);
+      }
+      return rejectWithValue('Network error occurred');
+    }
+  }
+);
+
+export const getStockChart = createAsyncThunk<ChartData, { symbol: string; timeframe: string }>(
+  'stocks/getStockChart',
+  async ({ symbol, timeframe }, { rejectWithValue }) => {
+    console.log('Chart API call:', `${API_BASE_URL}/stocks/chart/${symbol}/${timeframe}`);
+    try {
+      const response = await fetch(`${API_BASE_URL}/stocks/chart/${symbol}/${timeframe}`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new ApiError(errorData.detail || 'Failed to get stock chart', response.status);
+      }
+
+      return await response.json();
     } catch (error) {
       if (error instanceof ApiError) {
         return rejectWithValue(error.message);
