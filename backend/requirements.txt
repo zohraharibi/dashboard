@@ -1,8 +1,7 @@
 --only-binary=:all:
 wheel==0.43.0
 setuptools==70.0.0
-pydantic==2.5.0
-pydantic-core==2.14.1 
+pydantic==2.8.0
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 python-multipart==0.0.6
