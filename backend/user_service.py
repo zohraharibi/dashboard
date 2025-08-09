@@ -30,8 +30,7 @@ class UserService:
             full_name=user_data.full_name,
             hashed_password=hashed_password,
             is_active=True,
-            is_verified=False,
-            created_at=datetime.utcnow()
+            is_verified=False
         )
         
         try:
