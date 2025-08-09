@@ -101,6 +101,60 @@ async def get_stock_chart_svg(
         "points": " ".join(points),
         "viewBox": f"0 0 {config['points'] * config['x_step']} 150"
     }
+
+@router.get("/indexes")
+async def get_indexes():
+    """Get major stock market indexes from FinnHub"""
+    try:
+        # First get all available index symbols
+        url = f"{FINNHUB_BASE_URL}/index/constituents"
+        params = {
+            "symbol": "^GSPC",  # S&P 500 as default
+            "token": FINNHUB_API_KEY
+        }
+        
+        # Get list of major indexes
+        index_symbols = ["^GSPC", "^DJI", "^IXIC", "^RUT", "^FTSE", "^N225", "^HSI"]
+        
+        indexes_data = []
+        for symbol in index_symbols:
+            # Get index quote
+            quote_url = f"{FINNHUB_BASE_URL}/quote"
+            quote_params = {"symbol": symbol, "token": FINNHUB_API_KEY}
+            quote_response = requests.get(quote_url, params=quote_params)
+            
+            if quote_response.status_code == 200:
+                quote_data = quote_response.json()
+                indexes_data.append({
+                    "symbol": symbol,
+                    "name": {
+                        "^GSPC": "S&P 500",
+                        "^DJI": "Dow Jones",
+                        "^IXIC": "NASDAQ",
+                        "^RUT": "Russell 2000",
+                        "^FTSE": "FTSE 100",
+                        "^N225": "Nikkei 225",
+                        "^HSI": "Hang Seng"
+                    }.get(symbol, symbol),
+                    "price": quote_data.get("c"),
+                    "change": quote_data.get("d"),
+                    "percent_change": quote_data.get("dp"),
+                    "last_updated": datetime.utcnow().isoformat()
+                })
+        
+        return {
+            "indexes": indexes_data,
+            "count": len(indexes_data),
+            "last_updated": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch indexes: {str(e)}"
+        )
+        
+        
 @router.get("/{stock_id}", response_model=StockResponse)
 async def get_stock(
     stock_id: int,
@@ -115,6 +169,8 @@ async def get_stock(
             detail=f"Stock with ID {stock_id} not found"
         )
     return stock
+
+
 
 @router.post("/", response_model=StockResponse, status_code=status.HTTP_201_CREATED)
 async def create_stock(
