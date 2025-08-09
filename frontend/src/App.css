@@ -1046,6 +1046,206 @@ body {
   padding-left: 1.5rem;
 }
 
+/* Trade Modal Styles */
+.trade-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  pointer-events: auto;
+}
+
+.trade-modal-dialog {
+  background-color: var(--bg-primary);
+  border-radius: 8px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  position: relative;
+}
+
+.trade-modal-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trade-modal-title {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.trade-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.trade-modal-close:hover {
+  background-color: var(--bg-secondary);
+}
+
+.trade-modal-body {
+  padding: 1.5rem;
+}
+
+.trade-info-section {
+  margin-bottom: 1rem;
+}
+
+.trade-label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.trade-value {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.trade-action {
+  font-weight: 600;
+}
+
+.trade-action.buy {
+  color: var(--chart-positive);
+}
+
+.trade-action.sell {
+  color: var(--chart-negative);
+}
+
+.trade-quantity-section {
+  margin-bottom: 1rem;
+}
+
+.trade-input-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.trade-quantity-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.trade-quantity-input:focus {
+  outline: none;
+  border-color: var(--primary-green);
+}
+
+.trade-quantity-input.error {
+  border-color: var(--chart-negative);
+}
+
+.trade-error {
+  color: var(--chart-negative);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.trade-summary {
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+}
+
+.trade-divider {
+  margin: 0.5rem 0;
+  border: none;
+  border-top: 1px solid var(--border-light);
+}
+
+.trade-total {
+  font-weight: 600;
+}
+
+.trade-total-value.buy {
+  color: var(--chart-negative);
+}
+
+.trade-total-value.sell {
+  color: var(--chart-positive);
+}
+
+.trade-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.trade-btn-cancel {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.trade-btn-cancel:hover:not(:disabled) {
+  background-color: var(--bg-primary);
+}
+
+.trade-btn-cancel:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.trade-btn-confirm {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--primary-green);
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.trade-btn-confirm:hover:not(:disabled) {
+  background-color: #1ba085;
+}
+
+.trade-btn-confirm:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 /* Ensure full height and proper colors */
 html, body, #root {
   height: 100%;

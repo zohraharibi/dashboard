@@ -38,13 +38,8 @@ const MainBlock: React.FC = () => {
 
   // Handle timeframe change
   const handleTimeframeChange = (timeframe: string) => {
-    console.log('Timeframe changed to:', timeframe, 'for stock:', stock?.symbol);
     setSelectedTimeframe(timeframe);
-    if (stock?.symbol) {
-      stocksDispatch(getStockChart({ symbol: stock.symbol, timeframe }));
-    }
   };
-  console.log("here", currentChart?.points)
 
 
   // If no stock available, show empty block
@@ -125,12 +120,6 @@ const MainBlock: React.FC = () => {
               </div>
             ) : currentChart ? (
               <svg width="100%" height="160" className="main-block-chart-svg" viewBox={currentChart.viewBox}>
-                {/* Grid lines */}
-                <defs>
-                  <pattern id="grid" width="30" height="15" patternUnits="userSpaceOnUse">
-                    <path d="M 30 0 L 0 0 0 15" fill="none" stroke="#e0e0e0" strokeWidth="0.5"/>
-                  </pattern>
-                </defs>
                 <rect width="100%" height="100%" fill="url(#grid)" />
                 
                 <polyline
@@ -139,8 +128,6 @@ const MainBlock: React.FC = () => {
                   strokeWidth="2"
                   points={currentChart.points}
                 />
-                
-                {/* Data points - show last point */}
                 {currentChart.points && (() => {
                   const points = currentChart.points.split(' ');
                   const lastPoint = points[points.length - 1];

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { usePositions, useWatchlist, useSelectedStock, useStocks } from '../store/hooks';
 import { fetchPositions } from '../store/actions/positionActions';
 import { fetchWatchlistItems } from '../store/actions/watchlistActions';
@@ -8,114 +8,97 @@ import type { Position } from '../store/types/positionTypes';
 import type { WatchlistItem } from '../store/types/watchlistTypes';
 import type { ChartData } from '../store/types/stockTypes';
 
-
 const SideBlock: React.FC = () => {
-
   const { positions, dispatch: positionsDispatch } = usePositions();
   const { watchlistItems, dispatch: watchlistDispatch } = useWatchlist();
   const { dispatch: selectedStockDispatch } = useSelectedStock();
   const { dispatch: stocksDispatch } = useStocks();
   
-  // State to store chart data for each stock symbol
   const [chartData, setChartData] = useState<Record<string, ChartData>>({});
-  
-  // Add debugging
-  console.log('Current chart data:', chartData);
+  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
 
-  // Fetch data on component mount
+  // Memoize the combined list of symbols to prevent unnecessary re-renders
+  const allSymbols = useMemo(() => {
+    const symbols = new Set<string>();
+    positions.forEach(p => symbols.add(p.stock.symbol));
+    watchlistItems.forEach(w => symbols.add(w.stock.symbol));
+    return Array.from(symbols);
+  }, [positions, watchlistItems]);
+
+  // Fetch initial data
   useEffect(() => {
     positionsDispatch(fetchPositions());
     watchlistDispatch(fetchWatchlistItems());
   }, [positionsDispatch, watchlistDispatch]);
 
-  // Fetch chart data for all stocks (1Y timeframe)
-  useEffect(() => {
-    const allSymbols = new Set<string>();
+  // Stable fetch function with error handling
+  const fetchChartData = useCallback(async (symbol: string) => {
+    if (chartData[symbol] || isLoading[symbol]) return;
     
-    // Collect all unique symbols from positions and watchlist
-    positions.forEach(position => allSymbols.add(position.stock.symbol));
-    watchlistItems.forEach(item => allSymbols.add(item.stock.symbol));
-    
-    // Fetch 1Y chart data for each symbol
-    allSymbols.forEach(async (symbol) => {
-      try {
-        console.log(`Fetching chart data for ${symbol}`);
-        const result = await stocksDispatch(getStockChart({ symbol, timeframe: '1Y' }));
-        if (getStockChart.fulfilled.match(result)) {
-          console.log(`Chart data received for ${symbol}:`, result.payload);
-          setChartData(prev => ({
-            ...prev,
-            [symbol]: result.payload
-          }));
-        } else {
-          console.log(`Chart fetch failed for ${symbol}:`, result);
-        }
-      } catch (error) {
-        console.error(`Failed to fetch chart for ${symbol}:`, error);
+    try {
+      setIsLoading(prev => ({ ...prev, [symbol]: true }));
+      const result = await stocksDispatch(getStockChart({ symbol, timeframe: '1Y' }));
+      
+      if (getStockChart.fulfilled.match(result)) {
+        setChartData(prev => ({
+          ...prev,
+          [symbol]: result.payload
+        }));
       }
-    });
-  }, [positions, watchlistItems, stocksDispatch]);
+    } catch (error) {
+      console.error(`Failed to fetch chart for ${symbol}:`, error);
+    } finally {
+      setIsLoading(prev => ({ ...prev, [symbol]: false }));
+    }
+  }, [chartData, isLoading, stocksDispatch]);
 
-  // Handle position item click
-  const handlePositionClick = (position: Position) => {
+  // Fetch chart data only when symbols change
+  useEffect(() => {
+    allSymbols.forEach(symbol => {
+      fetchChartData(symbol);
+    });
+  }, [allSymbols, fetchChartData]);
+
+  // Memoized click handlers
+  const handlePositionClick = useCallback((position: Position) => {
     selectedStockDispatch(setSelectedStock({
       stock: position.stock,
       stockId: position.stock.id
     }));
-  };
+  }, [selectedStockDispatch]);
 
-  // Handle watchlist item click
-  const handleWatchlistClick = (watchlistItem: WatchlistItem) => {
+  const handleWatchlistClick = useCallback((watchlistItem: WatchlistItem) => {
     selectedStockDispatch(setSelectedStock({
       stock: watchlistItem.stock,
       stockId: watchlistItem.stock.id
     }));
-  };
+  }, [selectedStockDispatch]);
 
-  // Helper function to scale chart points for mini charts
-  const scaleChartPoints = (points: string, targetWidth: number = 60, targetHeight: number = 20): string => {
+  // Memoized scaled chart points
+  const getScaledPoints = useCallback((points: string = "", targetWidth: number = 60, targetHeight: number = 20): string => {
+    if (!points) return "";
+    
     try {
-      const pointPairs = points.split(' ');
-      const scaledPoints = pointPairs.map(point => {
+      return points.split(' ').map(point => {
         const [x, y] = point.split(',').map(Number);
-        // Scale x to fit in targetWidth, scale y to fit in targetHeight
-        const scaledX = (x / 360) * targetWidth; // Assuming original width ~360
-        const scaledY = (y / 150) * targetHeight; // Assuming original height ~150
+        const scaledX = (x / 360) * targetWidth;
+        const scaledY = (y / 150) * targetHeight;
         return `${scaledX.toFixed(1)},${scaledY.toFixed(1)}`;
-      });
-      return scaledPoints.join(' ');
-    } catch (error) {
-      console.error('Error scaling chart points:', error);
-      return "0,18 10,15 20,12 30,8 40,6 50,3"; // fallback
+      }).join(' ');
+    } catch {
+      return "";
     }
-  };
-
-
-  // const positions = [
-  //   { symbol: 'GOOGL', shares: '125 SHARES', price: '$1037.40', change: '+$1037.40', positive: true },
-  //   { symbol: 'TSLA', shares: '100 SHARES', price: '$259.40', change: '', positive: false },
-  //   { symbol: 'AMZN', shares: '50 SHARES', price: '$1443.65', change: '', positive: true },
-  //   { symbol: 'QCOM', shares: '200 SHARES', price: '$55.30', change: '', positive: true },
-  // ];
-
-  // const watchlist = [
-  //   { symbol: 'DIS', price: '$100.14', positive: true },
-  //   { symbol: 'AAPL', shares: 'Watchlist', price: '$168.17', positive: false },
-  //   { symbol: 'NFLX', price: '$296.00', positive: true },
-  //   { symbol: 'NVDA', shares: 'Watchlist', price: '$232.12', positive: true },
-  //   { symbol: 'FB', price: '$160.05', positive: true },
-  // ];
-
-
+  }, []);
 
   return (
     <div className="watchlist-container px-2">
+      {/* Positions Section */}
       <div className="mb-3">
         <h6 className="watchlist-section-title">Positions</h6>
         <div>
-          {positions.map((item, index) => (
+          {positions.map((item) => (
             <div 
-              key={index} 
+              key={`position-${item.stock.id}`}
               className="watchlist-item" 
               onClick={() => handlePositionClick(item)}
               style={{ cursor: 'pointer' }}
@@ -128,23 +111,13 @@ const SideBlock: React.FC = () => {
                 <div className="watchlist-item-center d-flex align-items-center">
                   <div className="watchlist-chart">
                     <svg width="60" height="20" className="position-relative">
-                      {chartData[item.stock.symbol] ? (
-                        <polyline
-                          fill="none"
-                          stroke="var(--chart-positive)"
-                          strokeWidth="1.5"
-                          points={chartData[item.stock.symbol].points}
-                          vectorEffect="non-scaling-stroke"
-                          transform="scale(0.6, 1)"
-                        />
-                      ) : (
-                        <polyline
-                          fill="none"
-                          stroke="var(--chart-positive)"
-                          strokeWidth="1.5"
-                          points="0,18 10,15 20,12 30,8 40,6 50,3"
-                        />
-                      )}
+                      <polyline
+                        fill="none"
+                        stroke="var(--chart-positive)"
+                        strokeWidth="1.5"
+                        points={getScaledPoints(chartData[item.stock.symbol]?.points)}
+                        // vectorEffect="non-scaling-stroke"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -163,9 +136,9 @@ const SideBlock: React.FC = () => {
       <div>
         <h6 className="watchlist-section-title">Watchlist</h6>
         <div>
-          {watchlistItems.map((item, index) => (
+          {watchlistItems.map((item) => (
             <div 
-              key={index} 
+              key={`watchlist-${item.stock.id}`}
               className="watchlist-item"
               onClick={() => handleWatchlistClick(item)}
               style={{ cursor: 'pointer' }}
@@ -177,24 +150,14 @@ const SideBlock: React.FC = () => {
                 </div>
                 <div className="watchlist-item-center d-flex align-items-center">
                   <div className="watchlist-chart">
-                    <svg width="60" height="20" className="position-relative">
-                      {chartData[item.stock.symbol] ? (
-                        <polyline
-                          fill="none"
-                          stroke="var(--chart-positive)"
-                          strokeWidth="1.5"
-                          points={chartData[item.stock.symbol].points}
-                          vectorEffect="non-scaling-stroke"
-                          transform="scale(0.6, 1)"
-                        />
-                      ) : (
-                        <polyline
-                          fill="none"
-                          stroke="var(--chart-positive)"
-                          strokeWidth="1.5"
-                          points="0,18 10,15 20,12 30,8 40,6 50,3"
-                        />
-                      )}
+                    <svg width="80" height="30" className="position-relative">
+                      <polyline
+                        fill="none"
+                        stroke="var(--chart-positive)"
+                        strokeWidth="1.5"
+                        points={getScaledPoints(chartData[item.stock.symbol]?.points)}
+                        vectorEffect="non-scaling-stroke"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -212,4 +175,4 @@ const SideBlock: React.FC = () => {
   );
 };
 
-export default SideBlock;
+export default React.memo(SideBlock);

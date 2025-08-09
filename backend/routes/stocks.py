@@ -84,15 +84,33 @@ async def get_stock_chart_svg(
     
     config = timeframe_config.get(timeframe)
     
-    # Generate descending values (example: 130 down to 30)
-    start_value = 130
-    end_value = 30
-    value_step = (start_value - end_value) / (config["points"] - 1)
+    # Generate symbol-specific chart data
+    import hashlib
+    import random
+    
+    # Create a seed based on symbol to ensure consistent but different data per symbol
+    seed = int(hashlib.md5(symbol.encode()).hexdigest()[:8], 16)
+    random.seed(seed)
+    
+    # Generate symbol-specific price range
+    base_price = 50 + (seed % 200)  # Price between 50-250
+    volatility = 0.1 + (seed % 30) / 100  # Volatility between 0.1-0.4
     
     points = []
+    current_price = base_price
+    
     for i in range(config["points"]):
         x = i * config["x_step"]
-        y = start_value - (i * value_step)
+        
+        # Add some realistic price movement
+        change_percent = (random.random() - 0.5) * volatility
+        current_price = current_price * (1 + change_percent)
+        
+        # Keep price within reasonable bounds
+        current_price = max(10, min(500, current_price))
+        
+        # Convert price to y-coordinate (invert for SVG)
+        y = 150 - (current_price / 500 * 120)  # Scale to fit in 150px height
         points.append(f"{x},{round(y,1)}")
     
     return {
@@ -101,7 +119,6 @@ async def get_stock_chart_svg(
         "points": " ".join(points),
         "viewBox": f"0 0 {config['points'] * config['x_step']} 150"
     }
-
 @router.get("/indexes")
 async def get_indexes():
     """Get major stock market indexes from FinnHub"""
