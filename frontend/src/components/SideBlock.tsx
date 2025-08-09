@@ -59,6 +59,8 @@ const SideBlock: React.FC = () => {
     });
   }, [allSymbols, fetchChartData]);
 
+
+
   // Memoized click handlers
   const handlePositionClick = useCallback((position: Position) => {
     selectedStockDispatch(setSelectedStock({

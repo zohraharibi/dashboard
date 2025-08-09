@@ -3,11 +3,14 @@ import { useSelectedStock, useStocks, usePositions, useWatchlist } from '../stor
 import { getStockQuote, getStockProfile, getStockChart } from '../store/actions/stockActions';
 import { buyShares, sellShares, fetchPositions } from '../store/actions/positionActions';
 import { fetchWatchlistItems, addToWatchlist, removeFromWatchlist } from '../store/actions/watchlistActions';
+
 import TradeModal from './TradeModal';
+import { toast } from 'react-toastify';
 
 const MainBlock: React.FC = () => {
   const { selectedStock } = useSelectedStock();
   const { 
+    stocks,
     currentQuote, 
     currentProfile, 
     currentChart, 
@@ -29,42 +32,35 @@ const MainBlock: React.FC = () => {
     watchlistDispatch(fetchWatchlistItems());
   }, [watchlistDispatch]);
 
-  // Use selected stock or first item from watchlist, otherwise show empty block
-  const stock = selectedStock || (watchlistItems.length > 0 ? watchlistItems[0].stock : null);
+  // Use selected stock or first item from stocks array, otherwise show empty block
+  const stock = selectedStock || (stocks.length > 0 ? stocks[0] : null);
 
-  // Fetch stock quote and profile when stock changes (not timeframe)
+  // Fetch stock data when stock changes
   useEffect(() => {
     if (stock?.symbol) {
       stocksDispatch(getStockQuote(stock.symbol));
       stocksDispatch(getStockProfile(stock.symbol));
-    }
-  }, [stock?.symbol, stocksDispatch]);
-
-  // Fetch chart data when stock or timeframe changes
-  useEffect(() => {
-    if (stock?.symbol) {
       stocksDispatch(getStockChart({ symbol: stock.symbol, timeframe: selectedTimeframe }));
     }
   }, [stock?.symbol, selectedTimeframe, stocksDispatch]);
+
+  // Find current position and watchlist item
+  const currentPosition = useMemo(() => {
+    return positions.find(pos => pos.stock.id === stock?.id);
+  }, [positions, stock?.id]);
+
+  const currentWatchlistItem = useMemo(() => {
+    return watchlistItems.find(item => item.stock.id === stock?.id);
+  }, [watchlistItems, stock?.id]);
+
+  const isInPositions = !!currentPosition;
+  const isInWatchlist = !!currentWatchlistItem;
+  const isFromTopbar = selectedStock && !isInPositions && !isInWatchlist;
 
   // Handle timeframe change
   const handleTimeframeChange = (timeframe: string) => {
     setSelectedTimeframe(timeframe);
   };
-
-  // Find current position for the selected stock
-  const currentPosition = useMemo(() => {
-    return positions.find(pos => pos.stock.id === stock?.id);
-  }, [positions, stock?.id]);
-
-  // Find current watchlist item for the selected stock
-  const currentWatchlistItem = useMemo(() => {
-    return watchlistItems.find(item => item.stock.id === stock?.id);
-  }, [watchlistItems, stock?.id]);
-
-  // Determine if stock is in positions or watchlist
-  const isInPositions = !!currentPosition;
-  const isInWatchlist = !!currentWatchlistItem;
 
   // Handle buy button click
   const handleBuyClick = () => {
@@ -75,11 +71,33 @@ const MainBlock: React.FC = () => {
   // Handle sell button click
   const handleSellClick = () => {
     if (!isInPositions) {
-      alert('You cannot sell a stock you don\'t own!');
+      toast.warning('You cannot sell a stock you don\'t own!');
       return;
     }
     setTradeType('sell');
     setShowTradeModal(true);
+  };
+
+  // Handle watchlist toggle for topbar stocks
+  const handleWatchlistToggle = async () => {
+    if (!stock) return;
+
+    try {
+      if (isInWatchlist && currentWatchlistItem) {
+        await watchlistDispatch(removeFromWatchlist(currentWatchlistItem.id));
+        toast.success(`${stock.symbol} removed from watchlist!`);
+      } else {
+        await watchlistDispatch(addToWatchlist({
+          stock_id: stock.id,
+          notes: `Added ${stock.symbol} to watchlist`
+        }));
+        toast.success(`${stock.symbol} added to watchlist!`);
+      }
+      await watchlistDispatch(fetchWatchlistItems());
+    } catch (error) {
+      console.error('Error toggling watchlist:', error);
+      toast.error('Failed to update watchlist. Please try again.');
+    }
   };
 
   // Handle trade confirmation
@@ -92,27 +110,22 @@ const MainBlock: React.FC = () => {
       setIsTradeLoading(true);
 
       if (tradeType === 'buy') {
-        // Buy shares logic
         await positionsDispatch(buyShares({
           stockId: stock.id,
           quantity,
           purchasePrice: currentQuote?.current_price || 100
         })).unwrap();
 
-        // If buying from watchlist, remove from watchlist
         if (isInWatchlist && currentWatchlistItem) {
           await watchlistDispatch(removeFromWatchlist(currentWatchlistItem.id));
         }
 
-        // Refresh positions to get updated data
         await positionsDispatch(fetchPositions());
-
         return { 
           success: true, 
           message: `Successfully bought ${quantity} share${quantity !== 1 ? 's' : ''} of ${stock.symbol}!` 
         };
       } else {
-        // Sell shares logic
         if (!currentPosition) {
           return { success: false, message: 'You don\'t own this stock!' };
         }
@@ -129,17 +142,14 @@ const MainBlock: React.FC = () => {
           quantity
         })).unwrap();
 
-        // If selling all shares, add to watchlist
         if (quantity === currentPosition.quantity) {
           await watchlistDispatch(addToWatchlist({
             stock_id: stock.id,
-            notes: `Previously owned ${currentPosition.quantity} shares`
+            notes: `Added ${stock.symbol} to watchlist after selling all shares`
           }));
         }
 
-        // Refresh positions to get updated quantities
         await positionsDispatch(fetchPositions());
-
         return { 
           success: true, 
           message: `Successfully sold ${quantity} share${quantity !== 1 ? 's' : ''} of ${stock.symbol}!` 
@@ -156,14 +166,15 @@ const MainBlock: React.FC = () => {
     }
   };
 
-
   // If no stock available, show empty block
   if (!stock) {
     return (
       <div className="main-block-container">
-        <div className="text-center text-muted py-5">
-          <h5>No stocks available</h5>
-          <p>Add stocks to your watchlist to get started</p>
+        <div className="d-flex justify-content-center align-items-center" style={{ height: '400px' }}>
+          <div className="text-center text-muted">
+            <h5>Select a stock to view details</h5>
+            <p>Choose a stock from your positions or watchlist to see detailed information and trading options.</p>
+          </div>
         </div>
       </div>
     );
@@ -171,6 +182,7 @@ const MainBlock: React.FC = () => {
 
   return (
     <div className="main-block-container">
+      {/* Header Section */}
       <div className="row mb-2">
         <div className="col-8">
           <h2 className="main-block-portfolio-value text-xl">
@@ -190,6 +202,10 @@ const MainBlock: React.FC = () => {
           <div className="main-block-after-hours">
             <i className="bi bi-arrow-up"></i>
             <span className="ms-1">0.26 (0.03%) After Hours</span>
+          </div>
+          <div className="main-block-actions">
+            <button className="action-tab-btn active">NEWS</button>
+            <button className="action-tab-btn">Stock Units</button>
           </div>
         </div>
         <div className="col-4">
@@ -211,10 +227,6 @@ const MainBlock: React.FC = () => {
                   <span className="ms-1 text-muted">86% BUY</span>
                 </div>
               </div>
-              <div className="main-block-actions">
-                <button className="action-tab-btn active">NEWS</button>
-                <button className="action-tab-btn">Stock Units</button>
-              </div>
             </div>
           </div>
         </div>
@@ -223,7 +235,7 @@ const MainBlock: React.FC = () => {
       {/* Long horizontal separator */}
       <div className="main-block-bottom-separator"></div>
 
-      {/* Chart - Fixed Small Height */}
+      {/* Chart Section */}
       <div className="row mb-2">
         <div className="col">
           <div className="rounded p-2 main-block-chart-container">
@@ -236,7 +248,6 @@ const MainBlock: React.FC = () => {
             ) : currentChart ? (
               <svg width="100%" height="160" className="main-block-chart-svg" viewBox={currentChart.viewBox}>
                 <rect width="100%" height="100%" fill="url(#grid)" />
-                
                 <polyline
                   fill="none"
                   stroke="#20c997"
@@ -258,53 +269,29 @@ const MainBlock: React.FC = () => {
         </div>
       </div>
 
-      <div className="row mb-2">
+      {/* Chart Controls */}
+      <div className="row mb-3">
         <div className="col">
           <div className="chart-controls-container">
             <div className="chart-time-buttons">
-              <button 
-                type="button" 
-                className={`chart-time-btn ${selectedTimeframe === '1D' ? 'active' : ''}`}
-                onClick={() => handleTimeframeChange('1D')}
-                disabled={isChartLoading}
-              >
-                1D
-              </button>
-              <button 
-                type="button" 
-                className={`chart-time-btn ${selectedTimeframe === '1W' ? 'active' : ''}`}
-                onClick={() => handleTimeframeChange('1W')}
-                disabled={isChartLoading}
-              >
-                1W
-              </button>
-              <button 
-                type="button" 
-                className={`chart-time-btn ${selectedTimeframe === '1Y' ? 'active' : ''}`}
-                onClick={() => handleTimeframeChange('1Y')}
-                disabled={isChartLoading}
-              >
-                1Y
-              </button>
-              <button 
-                type="button" 
-                className={`chart-time-btn ${selectedTimeframe === '5Y' ? 'active' : ''}`}
-                onClick={() => handleTimeframeChange('5Y')}
-                disabled={isChartLoading}
-              >
-                5Y
-              </button>
-              <button type="button" className="chart-time-btn" disabled>
-                INTERACTIVE CHART
-              </button>
+              {['1D', '1W', '1Y', '5Y', 'INTERACTIVE CHART'].map((timeframe) => (
+                <button
+                  key={timeframe}
+                  className={`chart-time-btn ${selectedTimeframe === timeframe ? 'active' : ''}`}
+                  onClick={() => handleTimeframeChange(timeframe)}
+                >
+                  {timeframe}
+                </button>
+              ))}
             </div>
           </div>
         </div>
       </div>
-      
-      <div className="mb-3"></div>
-      
-      {/* Stock Details Section */}
+
+      {/* Horizontal separator */}
+      <div className="main-block-horizontal-separator"></div>
+
+      {/* Stats Section */}
       <div className="row">
         <div className="col">
           <div className="main-block-stats-container">
@@ -315,19 +302,23 @@ const MainBlock: React.FC = () => {
                   <tbody>
                     <tr>
                       <td>Open</td>
-                      <td className="text-end">{currentQuote?.current_price || '—'}</td>
+                      <td className="text-end">{currentQuote?.open_price?.toFixed(2) || '—'}</td>
                     </tr>
                     <tr>
                       <td>High</td>
-                      <td className="text-end">{currentQuote?.current_price || '—'}</td>
+                      <td className="text-end">{currentQuote?.high_price?.toFixed(2) || '—'}</td>
                     </tr>
                     <tr>
                       <td>Low</td>
-                      <td className="text-end">{currentQuote?.current_price || '—'}</td>
+                      <td className="text-end">{currentQuote?.low_price?.toFixed(2) || '—'}</td>
                     </tr>
                     <tr>
                       <td>Volume</td>
-                      <td className="text-end">{'—'}</td>
+                      <td className="text-end">—</td>
+                    </tr>
+                    <tr>
+                      <td>Avg Volume</td>
+                      <td className="text-end">—</td>
                     </tr>
                   </tbody>
                 </table>
@@ -337,20 +328,24 @@ const MainBlock: React.FC = () => {
                 <table className="table table-sm main-block-stats-table">
                   <tbody>
                     <tr>
-                      <td>Market Cap</td>
-                      <td className="text-end">{currentProfile?.name || '—'}</td>
+                      <td>52 Wk High</td>
+                      <td className="text-end">—</td>
+                    </tr>
+                    <tr>
+                      <td>52 Wk Low</td>
+                      <td className="text-end">—</td>
+                    </tr>
+                    <tr>
+                      <td>Dividend</td>
+                      <td className="text-end">—</td>
+                    </tr>
+                    <tr>
+                      <td>Mkt Cap</td>
+                      <td className="text-end">{currentProfile?.marketCapitalization ? `$${(currentProfile.marketCapitalization / 1000000000).toFixed(2)}B` : '—'}</td>
                     </tr>
                     <tr>
                       <td>P/E Ratio</td>
-                      <td className="text-end">{'—'}</td>
-                    </tr>
-                    <tr>
-                      <td>52W High</td>
-                      <td className="text-end">{'—'}</td>
-                    </tr>
-                    <tr>
-                      <td>52W Low</td>
-                      <td className="text-end">{'—'}</td>
+                      <td className="text-end">—</td>
                     </tr>
                   </tbody>
                 </table>
@@ -360,43 +355,53 @@ const MainBlock: React.FC = () => {
         </div>
       </div>
 
-
-
+      {/* Action Buttons */}
       <div className="row">
         <div className="col">
           <div className="d-flex justify-content-end gap-2">
-            <button 
-              className={`btn px-5 main-block-action-btn ${!isInPositions ? 'disabled' : ''}`}
-              onClick={handleSellClick}
-              disabled={!isInPositions}
-              title={!isInPositions ? 'You must own this stock to sell it' : `Sell ${currentPosition?.quantity || 0} shares`}
-            >
-              SELL
-            </button>
-            <button 
-              className="btn px-5 main-block-action-btn"
-              onClick={handleBuyClick}
-              title="Buy shares of this stock"
-            >
-              BUY
-            </button>
+            {isFromTopbar ? (
+              // Show heart icon for watchlist toggle when stock is from topbar
+              <button 
+                className="btn px-5 main-block-action-btn d-flex align-items-center gap-2"
+                onClick={handleWatchlistToggle}
+              >
+                <span style={{ fontSize: '1.2em' }}>
+                  {isInWatchlist ? '❤️' : '🤍'}
+                </span>
+                {isInWatchlist ? 'REMOVE FROM WATCHLIST' : 'ADD TO WATCHLIST'}
+              </button>
+            ) : (
+              // Show traditional buy/sell buttons for stocks from positions/watchlist
+              <>
+                <button 
+                  className={`btn px-5 main-block-action-btn ${!isInPositions ? 'disabled' : ''}`}
+                  onClick={handleSellClick}
+                  disabled={!isInPositions}
+                >
+                  SELL
+                </button>
+                <button 
+                  className="btn px-5 main-block-action-btn"
+                  onClick={handleBuyClick}
+                >
+                  BUY
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
 
       {/* Trade Modal */}
-      {showTradeModal && stock && (
-        <TradeModal
-          show={showTradeModal}
-          onHide={() => setShowTradeModal(false)}
-          onConfirm={handleTradeConfirm}
-          tradeType={tradeType}
-          stockSymbol={stock.symbol}
-          currentPrice={100} // Use real price from stock quote
-          isLoading={isTradeLoading}
-
-        />
-      )}
+      <TradeModal
+        show={showTradeModal}
+        onHide={() => setShowTradeModal(false)}
+        onConfirm={handleTradeConfirm}
+        tradeType={tradeType}
+        stockSymbol={stock.symbol}
+        currentPrice={currentQuote?.current_price || 0}
+        isLoading={isTradeLoading}
+      />
     </div>
   );
 };

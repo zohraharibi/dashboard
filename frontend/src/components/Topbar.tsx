@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useStocks } from '../store/hooks';
+import { useStocks, useSelectedStock } from '../store/hooks';
 import { fetchStocks } from '../store/actions/stockActions';
+import { setSelectedStock } from '../store/reducers/selectedStockReducer';
 
 interface StockQuote {
   symbol: string;
@@ -12,6 +13,7 @@ interface StockQuote {
 
 const Topbar: React.FC = () => {
   const { stocks, dispatch } = useStocks();
+  const { dispatch: selectedStockDispatch } = useSelectedStock();
   const [quotes, setQuotes] = useState<StockQuote[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -71,6 +73,14 @@ const Topbar: React.FC = () => {
     return `${sign}${percent.toFixed(2)}% (${sign}${change.toFixed(2)})`;
   };
 
+  // Handle stock click - same pattern as SideBlock
+  const handleStockClick = (stock: any) => {
+    selectedStockDispatch(setSelectedStock({
+      stock: stock,
+      stockId: stock.id
+    }));
+  };
+
   // Show loading state if no stocks loaded yet
   if (stocks.length === 0) {
     return (
@@ -94,7 +104,11 @@ const Topbar: React.FC = () => {
             return (
               <React.Fragment key={stock.symbol}>
                 {index > 0 && <div className="topbar-separator"></div>}
-                <div className="text-center">
+                <div 
+                  className="text-center"
+                  onClick={() => handleStockClick(stock)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <div className="d-flex align-items-center justify-content-center gap-2 mb-1">
                     <small className="topbar-label">{stock.symbol}</small>
                     <span className="fw-bold topbar-value">
