@@ -32,11 +32,17 @@ const MainBlock: React.FC = () => {
   // Use selected stock or first item from watchlist, otherwise show empty block
   const stock = selectedStock || (watchlistItems.length > 0 ? watchlistItems[0].stock : null);
 
-  // Fetch Finnhub data when stock changes
+  // Fetch stock quote and profile when stock changes (not timeframe)
   useEffect(() => {
     if (stock?.symbol) {
       stocksDispatch(getStockQuote(stock.symbol));
       stocksDispatch(getStockProfile(stock.symbol));
+    }
+  }, [stock?.symbol, stocksDispatch]);
+
+  // Fetch chart data when stock or timeframe changes
+  useEffect(() => {
+    if (stock?.symbol) {
       stocksDispatch(getStockChart({ symbol: stock.symbol, timeframe: selectedTimeframe }));
     }
   }, [stock?.symbol, selectedTimeframe, stocksDispatch]);

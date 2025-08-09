@@ -8,16 +8,18 @@ from models import Stock, User
 from schemas import StockCreate, StockResponse, StockUpdate, MessageResponse, StockQuoteResponse
 from auth import get_current_user
 import os
-import requests
+import finnhub
+import random
+
 router = APIRouter(prefix="/stocks", tags=["stocks"])
 
 # FinnHub configuration
-# FINNHUB_API_KEY = os.getenv("d2b6v1hr01qrj4ikm0p0d2b6v1hr01qrj4ikm0pg")
-FINNHUB_API_KEY = "d2b6v1hr01qrj4ikm0p0d2b6v1hr01qrj4ikm0pg"
+FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY", "d2b6v1hr01qrj4ikm0p0d2b6v1hr01qrj4ikm0pg")
 if not FINNHUB_API_KEY:
     raise ValueError("FINNHUB_API_KEY not found in environment variables")
 
-FINNHUB_BASE_URL = "https://finnhub.io/api/v1"
+# Initialize Finnhub client
+finnhub_client = finnhub.Client(api_key=FINNHUB_API_KEY)
 
 @router.get("/", response_model=List[StockResponse])
 async def get_stocks(
@@ -123,41 +125,36 @@ async def get_stock_chart_svg(
 async def get_indexes():
     """Get major stock market indexes from FinnHub"""
     try:
-        # First get all available index symbols
-        url = f"{FINNHUB_BASE_URL}/index/constituents"
-        params = {
-            "symbol": "^GSPC",  # S&P 500 as default
-            "token": FINNHUB_API_KEY
-        }
-        
         # Get list of major indexes
         index_symbols = ["^GSPC", "^DJI", "^IXIC", "^RUT", "^FTSE", "^N225", "^HSI"]
         
         indexes_data = []
         for symbol in index_symbols:
-            # Get index quote
-            quote_url = f"{FINNHUB_BASE_URL}/quote"
-            quote_params = {"symbol": symbol, "token": FINNHUB_API_KEY}
-            quote_response = requests.get(quote_url, params=quote_params)
-            
-            if quote_response.status_code == 200:
-                quote_data = quote_response.json()
-                indexes_data.append({
-                    "symbol": symbol,
-                    "name": {
-                        "^GSPC": "S&P 500",
-                        "^DJI": "Dow Jones",
-                        "^IXIC": "NASDAQ",
-                        "^RUT": "Russell 2000",
-                        "^FTSE": "FTSE 100",
-                        "^N225": "Nikkei 225",
-                        "^HSI": "Hang Seng"
-                    }.get(symbol, symbol),
-                    "price": quote_data.get("c"),
-                    "change": quote_data.get("d"),
-                    "percent_change": quote_data.get("dp"),
-                    "last_updated": datetime.utcnow().isoformat()
-                })
+            try:
+                # Get index quote using finnhub client - much cleaner!
+                quote_data = finnhub_client.quote(symbol)
+                
+                if quote_data and 'c' in quote_data:
+                    indexes_data.append({
+                        "symbol": symbol,
+                        "name": {
+                            "^GSPC": "S&P 500",
+                            "^DJI": "Dow Jones",
+                            "^IXIC": "NASDAQ",
+                            "^RUT": "Russell 2000",
+                            "^FTSE": "FTSE 100",
+                            "^N225": "Nikkei 225",
+                            "^HSI": "Hang Seng"
+                        }.get(symbol, symbol),
+                        "price": quote_data.get("c"),
+                        "change": quote_data.get("d"),
+                        "percent_change": quote_data.get("dp"),
+                        "last_updated": datetime.utcnow().isoformat()
+                    })
+            except Exception as e:
+                # Skip individual index if it fails, continue with others
+                print(f"Failed to fetch data for {symbol}: {e}")
+                continue
         
         return {
             "indexes": indexes_data,
@@ -288,43 +285,41 @@ async def get_stock_quote(
             detail=f"Stock with symbol '{symbol}' not found in our database"
         )
     
-    # Get quote from FinnHub
-    url = f"{FINNHUB_BASE_URL}/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
-    response = requests.get(url)
-    
-    if response.status_code != 200:
-        raise HTTPException(
-            status_code=response.status_code,
-            detail="Error fetching stock quote from FinnHub"
+    try:
+        data = finnhub_client.quote(symbol.upper())
+        
+        if not data or 'c' not in data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No quote data available for symbol '{symbol}'"
+            )
+        
+        # Determine direction
+        change = data.get('d', 0)
+        if change > 0:
+            direction = "up"
+        elif change < 0:
+            direction = "down"
+        else:
+            direction = "neutral"
+        
+        return StockQuoteResponse(
+            current_price=data['c'],
+            change=data['d'],
+            percent_change=data['dp'],
+            high_price=data['h'],
+            low_price=data['l'],
+            open_price=data['o'],
+            previous_close=data['pc'],
+            direction=direction,
+            last_updated=datetime.utcnow()
         )
     
-    data = response.json()
-    if not data or 'c' not in data:
+    except Exception as e:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No quote data available for symbol '{symbol}'"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error fetching stock quote: {str(e)}"
         )
-    
-    # Determine direction
-    change = data.get('d', 0)
-    if change > 0:
-        direction = "up"
-    elif change < 0:
-        direction = "down"
-    else:
-        direction = "neutral"
-    
-    return StockQuoteResponse(
-        current_price=data['c'],
-        change=data['d'],
-        percent_change=data['dp'],
-        high_price=data['h'],
-        low_price=data['l'],
-        open_price=data['o'],
-        previous_close=data['pc'],
-        direction=direction,
-        last_updated=datetime.utcnow()
-    )
 
 @router.get("/{symbol}/profile")
 async def get_stock_profile(
@@ -343,23 +338,20 @@ async def get_stock_profile(
             detail=f"Stock with symbol '{symbol}' not found in our database"
         )
     
-    # Get profile from FinnHub
-    url = f"{FINNHUB_BASE_URL}/stock/profile2?symbol={symbol}&token={FINNHUB_API_KEY}"
-    response = requests.get(url)
+    try:
+        profile_data = finnhub_client.company_profile2(symbol=symbol.upper())
+        
+        if not profile_data:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No profile data available for symbol '{symbol}'"
+            )
+        
+        return profile_data
     
-    if response.status_code != 200:
+    except Exception as e:
         raise HTTPException(
-            status_code=response.status_code,
-            detail="Error fetching company profile from FinnHub"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error fetching company profile: {str(e)}"
         )
-    
-    profile_data = response.json()
-    if not profile_data:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No profile data available for symbol '{symbol}'"
-        )
-    
-    # You might want to update your database with some of this info
-    return profile_data
 

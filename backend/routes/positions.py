@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
 from models import Position, Stock, User
-from schemas import PositionCreate, PositionResponse, PositionUpdate, MessageResponse, PortfolioSummary
+from schemas import PositionCreate, PositionResponse, PositionUpdate, MessageResponse, PortfolioSummary, SellResponse
 from auth import get_current_user
 
 router = APIRouter(prefix="/positions", tags=["positions"])
@@ -170,7 +170,7 @@ async def delete_position(
         message=f"Position in {stock_symbol} deleted successfully"
     )
 
-@router.post("/{position_id}/sell", response_model=PositionResponse)
+@router.post("/{position_id}/sell", response_model=SellResponse)
 async def sell_shares(
     position_id: int,
     quantity: float,
@@ -201,6 +201,8 @@ async def sell_shares(
             detail="Cannot sell more shares than owned"
         )
     
+    stock_symbol = position.stock.symbol
+    
     # Update position quantity
     position.quantity -= quantity
     
@@ -208,10 +210,18 @@ async def sell_shares(
     if position.quantity == 0:
         db.delete(position)
         db.commit()
-        return MessageResponse(
-            message=f"All shares sold. Position closed."
+        return SellResponse(
+            success=True,
+            message=f"All shares of {stock_symbol} sold. Position closed.",
+            position_closed=True,
+            position=None
         )
     else:
         db.commit()
         db.refresh(position)
-        return position
+        return SellResponse(
+            success=True,
+            message=f"Sold {quantity} shares of {stock_symbol}. {position.quantity} shares remaining.",
+            position_closed=False,
+            position=position
+        )

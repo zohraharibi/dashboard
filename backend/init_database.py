@@ -60,6 +60,123 @@ def init_sample_stocks():
     finally:
         db.close()
 
+def init_sample_positions(user_id: int):
+    """Initialize database with sample position data for a user"""
+    
+    db = next(get_db())
+    
+    try:
+        # Check if positions already exist for this user
+        existing_positions = db.query(Position).filter(Position.user_id == user_id).count()
+        if existing_positions > 0:
+            print(f"💼 User {user_id} already has {existing_positions} positions")
+            return
+        
+        # Get stock IDs for the positions
+        aapl_stock = db.query(Stock).filter(Stock.symbol == "AAPL").first()
+        tsla_stock = db.query(Stock).filter(Stock.symbol == "TSLA").first()
+        
+        if not aapl_stock or not tsla_stock:
+            print("❌ Required stocks (AAPL, TSLA) not found in database")
+            return
+        
+        # Sample positions data
+        sample_positions = [
+            {
+                "user_id": user_id,
+                "stock_id": aapl_stock.id,
+                "quantity": 50,
+                "purchase_price": 185.25,
+                "notes": "Long-term investment in Apple ecosystem"
+            },
+            {
+                "user_id": user_id,
+                "stock_id": tsla_stock.id,
+                "quantity": 25,
+                "purchase_price": 242.80,
+                "notes": "EV market growth play"
+            }
+        ]
+        
+        # Add sample positions
+        for position_data in sample_positions:
+            position = Position(**position_data)
+            db.add(position)
+        
+        db.commit()
+        print(f"✅ Added {len(sample_positions)} sample positions for user {user_id}")
+        
+        # Display created positions
+        positions = db.query(Position).filter(Position.user_id == user_id).all()
+        print(f"\n💼 User {user_id} positions:")
+        for position in positions:
+            stock = db.query(Stock).filter(Stock.id == position.stock_id).first()
+            total_value = position.quantity * position.purchase_price
+            print(f"  • {stock.symbol}: {position.quantity} shares @ ${position.purchase_price:.2f} = ${total_value:.2f}")
+            
+    except Exception as e:
+        print(f"❌ Error initializing position data: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
+def init_sample_watchlist(user_id: int):
+    """Initialize database with sample watchlist data for a user"""
+    
+    db = next(get_db())
+    
+    try:
+        # Check if watchlist items already exist for this user
+        existing_watchlist = db.query(Watchlist).filter(Watchlist.user_id == user_id).count()
+        if existing_watchlist > 0:
+            print(f"👀 User {user_id} already has {existing_watchlist} watchlist items")
+            return
+        
+        # Get stock IDs for the watchlist
+        nvda_stock = db.query(Stock).filter(Stock.symbol == "NVDA").first()
+        meta_stock = db.query(Stock).filter(Stock.symbol == "META").first()
+        
+        if not nvda_stock or not meta_stock:
+            print("❌ Required stocks (NVDA, META) not found in database")
+            return
+        
+        # Sample watchlist data
+        sample_watchlist = [
+            {
+                "user_id": user_id,
+                "stock_id": nvda_stock.id,
+                "notes": "Watching for AI/GPU market developments"
+            },
+            {
+                "user_id": user_id,
+                "stock_id": meta_stock.id,
+                "notes": "Monitoring metaverse and VR investments"
+            }
+        ]
+        
+        # Add sample watchlist items
+        for watchlist_data in sample_watchlist:
+            watchlist_item = Watchlist(**watchlist_data)
+            db.add(watchlist_item)
+        
+        db.commit()
+        print(f"✅ Added {len(sample_watchlist)} sample watchlist items for user {user_id}")
+        
+        # Display created watchlist items
+        watchlist_items = db.query(Watchlist).filter(Watchlist.user_id == user_id).all()
+        print(f"\n👀 User {user_id} watchlist:")
+        for item in watchlist_items:
+            stock = db.query(Stock).filter(Stock.id == item.stock_id).first()
+            print(f"  • {stock.symbol}: {stock.name}")
+            if item.notes:
+                print(f"    Notes: {item.notes}")
+            
+    except Exception as e:
+        print(f"❌ Error initializing watchlist data: {e}")
+        db.rollback()
+    finally:
+        db.close()
+
 def show_table_info():
     """Display information about created tables"""
     

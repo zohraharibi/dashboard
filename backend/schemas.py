@@ -195,3 +195,10 @@ class ErrorResponse(BaseModel):
     success: bool = False
     error_code: Optional[str] = None
     details: Optional[dict] = None
+
+# Trade response schema for sell operations
+class SellResponse(BaseModel):
+    success: bool
+    message: str
+    position_closed: bool
+    position: Optional[PositionResponse] = None
