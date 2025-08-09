@@ -39,7 +39,7 @@ const Topbar: React.FC = () => {
 
       const quotePromises = stocksToShow.map(async (stock) => {
         try {
-          const response = await fetch(`http://localhost:8000/stocks/${stock.symbol}/quote`, {
+          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/stocks/${stock.symbol}/quote`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json',

@@ -119,7 +119,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   // API base URL
-  const API_BASE_URL = 'http://localhost:8000';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   // Login function
   const login = async (credentials: LoginCredentials): Promise<void> => {

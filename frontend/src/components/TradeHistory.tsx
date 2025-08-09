@@ -32,7 +32,7 @@ const TradeHistory: React.FC = () => {
         throw new Error('Authentication token not found. Please log in again.');
       }
 
-      const response = await fetch('http://localhost:8000/trade-history/', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/trade-history/`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
