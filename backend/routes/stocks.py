@@ -121,54 +121,7 @@ async def get_stock_chart_svg(
         "points": " ".join(points),
         "viewBox": f"0 0 {config['points'] * config['x_step']} 150"
     }
-@router.get("/indexes")
-async def get_indexes():
-    """Get major stock market indexes from FinnHub"""
-    try:
-        # Get list of major indexes
-        index_symbols = ["^GSPC", "^DJI", "^IXIC", "^RUT", "^FTSE", "^N225", "^HSI"]
-        
-        indexes_data = []
-        for symbol in index_symbols:
-            try:
-                # Get index quote using finnhub client - much cleaner!
-                quote_data = finnhub_client.quote(symbol)
-                
-                if quote_data and 'c' in quote_data:
-                    indexes_data.append({
-                        "symbol": symbol,
-                        "name": {
-                            "^GSPC": "S&P 500",
-                            "^DJI": "Dow Jones",
-                            "^IXIC": "NASDAQ",
-                            "^RUT": "Russell 2000",
-                            "^FTSE": "FTSE 100",
-                            "^N225": "Nikkei 225",
-                            "^HSI": "Hang Seng"
-                        }.get(symbol, symbol),
-                        "price": quote_data.get("c"),
-                        "change": quote_data.get("d"),
-                        "percent_change": quote_data.get("dp"),
-                        "last_updated": datetime.utcnow().isoformat()
-                    })
-            except Exception as e:
-                # Skip individual index if it fails, continue with others
-                print(f"Failed to fetch data for {symbol}: {e}")
-                continue
-        
-        return {
-            "indexes": indexes_data,
-            "count": len(indexes_data),
-            "last_updated": datetime.utcnow().isoformat()
-        }
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Failed to fetch indexes: {str(e)}"
-        )
-        
-        
+
 @router.get("/{stock_id}", response_model=StockResponse)
 async def get_stock(
     stock_id: int,

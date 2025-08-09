@@ -1,57 +1,117 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useStocks } from '../store/hooks';
+import { fetchStocks } from '../store/actions/stockActions';
+
+interface StockQuote {
+  symbol: string;
+  current_price: number;
+  change: number;
+  percent_change: number;
+  direction: 'up' | 'down' | 'neutral';
+}
 
 const Topbar: React.FC = () => {
+  const { stocks, dispatch } = useStocks();
+  const [quotes, setQuotes] = useState<StockQuote[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch stocks from database first
+  useEffect(() => {
+    dispatch(fetchStocks());
+  }, [dispatch]);
+
+  // Fetch quotes for database stocks
+  useEffect(() => {
+    if (stocks.length > 0) {
+      fetchQuotesForStocks();
+    }
+  }, [stocks]);
+
+  const fetchQuotesForStocks = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) return;
+
+      // Take first 6 stocks from database for topbar display
+      const stocksToShow = stocks.slice(0, 6);
+
+      const quotePromises = stocksToShow.map(async (stock) => {
+        try {
+          const response = await fetch(`http://localhost:8000/stocks/${stock.symbol}/quote`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            return { symbol: stock.symbol, ...data };
+          }
+          return null;
+        } catch (error) {
+          console.error(`Error fetching quote for ${stock.symbol}:`, error);
+          return null;
+        }
+      });
+
+      const results = await Promise.all(quotePromises);
+      const validQuotes = results.filter((quote): quote is StockQuote => quote !== null);
+      setQuotes(validQuotes);
+    } catch (error) {
+      console.error('Error fetching market quotes:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatPrice = (price: number) => `$${price.toFixed(2)}`;
+  const formatChange = (change: number, percent: number) => {
+    const sign = change >= 0 ? '+' : '';
+    return `${sign}${percent.toFixed(2)}% (${sign}${change.toFixed(2)})`;
+  };
+
+  // Show loading state if no stocks loaded yet
+  if (stocks.length === 0) {
+    return (
+      <div className="px-4 topbar-main">
+        <div className="d-flex justify-content-center align-items-center w-100">
+          <div className="text-center text-muted">
+            <small>Loading stocks...</small>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="px-4 topbar-main">
       <div className="d-flex justify-content-between align-items-center w-100">
         <div className="d-flex justify-content-between w-100 align-items-center topbar-content">
-          <div className="text-center">
-            <div className="d-flex align-items-center justify-content-center gap-2 mb-1">
-              <small className="topbar-label">S&P 500</small>
-              <span className="fw-bold topbar-value">$2,640.87</span>
-            </div>
-            <small className="topbar-positive">1.38% (35.67)</small>
-          </div>
-          <div className="topbar-separator"></div>
-          <div className="text-center">
-            <div className="d-flex align-items-center justify-content-center gap-2 mb-1">
-              <small className="topbar-label">DOW</small>
-              <span className="fw-bold topbar-value">$24,103.10</span>
-            </div>
-            <small className="topbar-positive">1.67% (254.70)</small>
-          </div>
-          <div className="topbar-separator"></div>
-          <div className="text-center">
-            <div className="d-flex align-items-center justify-content-center gap-2 mb-1">
-              <small className="topbar-label">NASDAQ</small>
-              <span className="fw-bold topbar-value">$7,063.40</span>
-            </div>
-            <small className="topbar-positive">1.64% (114.20)</small>
-          </div>
-          <div className="topbar-separator"></div>
-          <div className="text-center">
-            <div className="d-flex align-items-center justify-content-center gap-2 mb-1">
-              <small className="topbar-label">FUTURES</small>
-              <span className="fw-bold topbar-value">$1.23</span>
-            </div>
-            <small className="topbar-negative">-0.17% (-0.002)</small>
-          </div>
-          <div className="topbar-separator"></div>
-          <div className="text-center">
-            <div className="d-flex align-items-center justify-content-center gap-2 mb-1">
-              <small className="topbar-label">CRUDE OIL</small>
-              <span className="fw-bold topbar-value">$64.90</span>
-            </div>
-            <small className="topbar-positive">6.45% (0.29)</small>
-          </div>
-          <div className="topbar-separator"></div>
-          <div className="text-center">
-            <div className="d-flex align-items-center justify-content-center gap-2 mb-1">
-              <small className="topbar-label">VIX</small>
-              <span className="fw-bold topbar-value">$30.17</span>
-            </div>
-            <small className="topbar-negative">-12.66% (-2.9)</small>
-          </div>
+          {stocks.slice(0, 6).map((stock, index) => {
+            const quote = quotes.find(q => q.symbol === stock.symbol);
+            
+            return (
+              <React.Fragment key={stock.symbol}>
+                {index > 0 && <div className="topbar-separator"></div>}
+                <div className="text-center">
+                  <div className="d-flex align-items-center justify-content-center gap-2 mb-1">
+                    <small className="topbar-label">{stock.symbol}</small>
+                    <span className="fw-bold topbar-value">
+                      {quote ? formatPrice(quote.current_price) : '--'}
+                    </span>
+                  </div>
+                  <small className={
+                    quote?.direction === 'up' ? 'topbar-positive' : 
+                    quote?.direction === 'down' ? 'topbar-negative' : 
+                    'text-muted'
+                  }>
+                    {quote ? formatChange(quote.change, quote.percent_change) : (isLoading ? 'Loading...' : 'N/A')}
+                  </small>
+                </div>
+              </React.Fragment>
+            );
+          })}
         </div>
       </div>
     </div>
