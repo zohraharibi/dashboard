@@ -3,7 +3,7 @@ import Sidebar from '../Sidebar';
 import Topbar from '../Topbar';
 import MainContent from '../MainContent';
 
-export type ActiveView = 'dashboard' | 'info';
+export type ActiveView = 'dashboard' | 'info' | 'trade-history';
 
 const Dashboard: React.FC = () => {
   const [activeView, setActiveView] = useState<ActiveView>('dashboard');

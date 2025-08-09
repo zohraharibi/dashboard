@@ -18,6 +18,7 @@ class User(Base):
     # Relationships
     positions = relationship("Position", back_populates="user", cascade="all, delete-orphan")
     watchlist = relationship("Watchlist", back_populates="user", cascade="all, delete-orphan")
+    trade_history = relationship("TradeHistory", back_populates="user", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<User(id={self.id}, email='{self.email}', username='{self.username}')>"
@@ -39,6 +40,7 @@ class Stock(Base):
     # Relationships
     positions = relationship("Position", back_populates="stock", cascade="all, delete-orphan")
     watchlist = relationship("Watchlist", back_populates="stock", cascade="all, delete-orphan")
+    trade_history = relationship("TradeHistory", back_populates="stock", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Stock(id={self.id}, symbol='{self.symbol}', name='{self.name}')>"
@@ -90,3 +92,25 @@ class Watchlist(Base):
         __table_args__ = (
             {'extend_existing': True}
         )
+
+
+class TradeHistory(Base):
+    __tablename__ = "trade_history"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    stock_id = Column(Integer, ForeignKey("stocks.id"), nullable=False)
+    trade_type = Column(String(10), nullable=False)  # 'BUY' or 'SELL'
+    quantity = Column(Float, nullable=False)
+    price_per_share = Column(Float, nullable=False)
+    total_amount = Column(Float, nullable=False)  # quantity * price_per_share
+    trade_date = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    notes = Column(String(500), nullable=True)  # Optional notes about the trade
+
+    # Relationships
+    user = relationship("User", back_populates="trade_history")
+    stock = relationship("Stock", back_populates="trade_history")
+
+    def __repr__(self):
+        return f"<TradeHistory(id={self.id}, user_id={self.user_id}, stock_id={self.stock_id}, trade_type='{self.trade_type}', quantity={self.quantity}, price={self.price_per_share})>"

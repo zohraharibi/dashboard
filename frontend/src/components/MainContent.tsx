@@ -2,6 +2,7 @@ import React from 'react';
 import MainBlock from './MainBlock';
 import SideBlock from './SideBlock';
 import Info from './Pages/Info';
+import TradeHistory from './TradeHistory';
 import type { ActiveView } from './Pages/Dashboard';
 
 interface MainContentProps {
@@ -20,6 +21,8 @@ const MainContent: React.FC<MainContentProps> = ({ activeView }) => {
           <SideBlock />
         </div>
       </div>
+    ) : activeView === 'trade-history' ? (
+      <TradeHistory />
     ) : (
       <Info />
     )}

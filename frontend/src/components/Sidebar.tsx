@@ -89,6 +89,14 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
             <i className={`bi ${isDarkMode ? 'bi-sun' : 'bi-moon'} fs-5`}></i>
           </button>
           <button 
+            onClick={() => onViewChange(activeView === 'trade-history' ? 'dashboard' : 'trade-history')}
+            className={`nav-link text-muted mb-3 ${activeView === 'trade-history' ? 'sidebar-nav-active' : ''}`}
+            style={{ background: 'none', border: 'none' }}
+            title={activeView === 'trade-history' ? 'Back to Dashboard' : 'Trade History'}
+          >
+            <i className={`bi ${activeView === 'trade-history' ? 'bi-arrow-left' : 'bi-gear'} fs-5`}></i>
+          </button>
+          <button 
             onClick={() => onViewChange(activeView === 'info' ? 'dashboard' : 'info')}
             className={`nav-link text-muted mb-3 ${activeView === 'info' ? 'sidebar-nav-active' : ''}`}
             style={{ background: 'none', border: 'none' }}

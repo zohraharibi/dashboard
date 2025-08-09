@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from database import get_db
-from models import Position, Stock, User
+from models import Position, Stock, User, TradeHistory
 from schemas import PositionCreate, PositionResponse, PositionUpdate, MessageResponse, PortfolioSummary, SellResponse
 from auth import get_current_user
 
@@ -101,6 +101,18 @@ async def create_position(
         existing_position.quantity = total_shares
         existing_position.purchase_price = new_avg_price
         
+        # Record trade history for additional purchase
+        trade_record = TradeHistory(
+            user_id=current_user.id,
+            stock_id=position_data.stock_id,
+            trade_type="BUY",
+            quantity=position_data.quantity,
+            price_per_share=position_data.purchase_price,
+            total_amount=position_data.quantity * position_data.purchase_price,
+            notes=f"Additional purchase of {stock.symbol} (averaged with existing position)"
+        )
+        db.add(trade_record)
+        
         db.commit()
         db.refresh(existing_position)
         return existing_position
@@ -111,6 +123,19 @@ async def create_position(
             **position_data.dict()
         )
         db.add(position)
+        
+        # Record trade history
+        trade_record = TradeHistory(
+            user_id=current_user.id,
+            stock_id=position_data.stock_id,
+            trade_type="BUY",
+            quantity=position_data.quantity,
+            price_per_share=position_data.purchase_price,
+            total_amount=position_data.quantity * position_data.purchase_price,
+            notes=f"Initial purchase of {stock.symbol}"
+        )
+        db.add(trade_record)
+        
         db.commit()
         db.refresh(position)
         return position
@@ -202,6 +227,18 @@ async def sell_shares(
         )
     
     stock_symbol = position.stock.symbol
+    
+    # Record trade history for sell transaction
+    trade_record = TradeHistory(
+        user_id=current_user.id,
+        stock_id=position.stock_id,
+        trade_type="SELL",
+        quantity=quantity,
+        price_per_share=position.purchase_price,  # Using purchase price for now, could be current market price
+        total_amount=quantity * position.purchase_price,
+        notes=f"Sold {quantity} shares of {stock_symbol}"
+    )
+    db.add(trade_record)
     
     # Update position quantity
     position.quantity -= quantity

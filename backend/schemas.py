@@ -202,3 +202,32 @@ class SellResponse(BaseModel):
     message: str
     position_closed: bool
     position: Optional[PositionResponse] = None
+
+# Trade History schemas
+class TradeHistoryBase(BaseModel):
+    stock_id: int = Field(..., description="Stock ID")
+    trade_type: str = Field(..., description="Trade type: BUY or SELL")
+    quantity: float = Field(..., gt=0, description="Number of shares traded")
+    price_per_share: float = Field(..., gt=0, description="Price per share")
+    total_amount: float = Field(..., gt=0, description="Total trade amount")
+    notes: Optional[str] = Field(None, max_length=500, description="Optional trade notes")
+
+class TradeHistoryCreate(TradeHistoryBase):
+    pass
+
+class TradeHistoryResponse(TradeHistoryBase):
+    id: int
+    user_id: int
+    trade_date: datetime
+    created_at: datetime
+    stock: StockResponse
+    
+    class Config:
+        from_attributes = True
+
+class TradeHistorySummary(BaseModel):
+    total_trades: int
+    total_buy_amount: float
+    total_sell_amount: float
+    net_amount: float  # total_buy_amount - total_sell_amount
+    trades: List[TradeHistoryResponse]

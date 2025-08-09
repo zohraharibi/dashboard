@@ -7,6 +7,7 @@ from routes.auth import router as auth_router
 from routes.stocks import router as stocks_router
 from routes.positions import router as positions_router
 from routes.watchlist import router as watchlist_router
+from routes.trade_history import router as trade_history_router
 import uvicorn
 import logging
 
@@ -69,6 +70,7 @@ app.include_router(auth_router)
 app.include_router(stocks_router)
 app.include_router(positions_router)
 app.include_router(watchlist_router)
+app.include_router(trade_history_router)
 
 # Root endpoint
 @app.get("/")
