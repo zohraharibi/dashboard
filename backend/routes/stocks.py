@@ -2,12 +2,22 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from typing import List, Optional
+from datetime import datetime
 from database import get_db
 from models import Stock, User
-from schemas import StockCreate, StockResponse, StockUpdate, MessageResponse
+from schemas import StockCreate, StockResponse, StockUpdate, MessageResponse, StockQuoteResponse
 from auth import get_current_user
-
+import os
+import requests
 router = APIRouter(prefix="/stocks", tags=["stocks"])
+
+# FinnHub configuration
+# FINNHUB_API_KEY = os.getenv("d2b6v1hr01qrj4ikm0p0d2b6v1hr01qrj4ikm0pg")
+FINNHUB_API_KEY = "d2b6v1hr01qrj4ikm0p0d2b6v1hr01qrj4ikm0pg"
+if not FINNHUB_API_KEY:
+    raise ValueError("FINNHUB_API_KEY not found in environment variables")
+
+FINNHUB_BASE_URL = "https://finnhub.io/api/v1"
 
 @router.get("/", response_model=List[StockResponse])
 async def get_stocks(
@@ -144,3 +154,99 @@ async def delete_stock(
         message=f"Stock '{stock.symbol}' deleted successfully",
         success=True
     )
+
+
+# Add these new endpoints to your existing router
+
+@router.get("/{symbol}/quote", response_model=StockQuoteResponse)
+async def get_stock_quote(
+    symbol: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get real-time stock quote data from FinnHub for a specific stock symbol.
+    Returns price, change, and market data with direction indicator.
+    """
+    # First check if stock exists in our database
+    stock = db.query(Stock).filter(Stock.symbol == symbol.upper()).first()
+    if not stock:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Stock with symbol '{symbol}' not found in our database"
+        )
+    
+    # Get quote from FinnHub
+    url = f"{FINNHUB_BASE_URL}/quote?symbol={symbol}&token={FINNHUB_API_KEY}"
+    response = requests.get(url)
+    
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=response.status_code,
+            detail="Error fetching stock quote from FinnHub"
+        )
+    
+    data = response.json()
+    if not data or 'c' not in data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No quote data available for symbol '{symbol}'"
+        )
+    
+    # Determine direction
+    change = data.get('d', 0)
+    if change > 0:
+        direction = "up"
+    elif change < 0:
+        direction = "down"
+    else:
+        direction = "neutral"
+    
+    return StockQuoteResponse(
+        current_price=data['c'],
+        change=data['d'],
+        percent_change=data['dp'],
+        high_price=data['h'],
+        low_price=data['l'],
+        open_price=data['o'],
+        previous_close=data['pc'],
+        direction=direction,
+        last_updated=datetime.utcnow()
+    )
+
+@router.get("/{symbol}/profile")
+async def get_stock_profile(
+    symbol: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get company profile information from FinnHub for a specific stock symbol.
+    """
+    # Verify stock exists in our database first
+    stock = db.query(Stock).filter(Stock.symbol == symbol.upper()).first()
+    if not stock:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Stock with symbol '{symbol}' not found in our database"
+        )
+    
+    # Get profile from FinnHub
+    url = f"{FINNHUB_BASE_URL}/stock/profile2?symbol={symbol}&token={FINNHUB_API_KEY}"
+    response = requests.get(url)
+    
+    if response.status_code != 200:
+        raise HTTPException(
+            status_code=response.status_code,
+            detail="Error fetching company profile from FinnHub"
+        )
+    
+    profile_data = response.json()
+    if not profile_data:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No profile data available for symbol '{symbol}'"
+        )
+    
+    # You might want to update your database with some of this info
+    return profile_data

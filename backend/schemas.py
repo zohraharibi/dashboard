@@ -106,6 +106,18 @@ class StockUpdate(BaseModel):
     exchange: Optional[str] = None
     currency: Optional[str] = None
 
+
+class StockQuoteResponse(BaseModel):
+    current_price: float
+    change: float
+    percent_change: float
+    high_price: float
+    low_price: float
+    open_price: float
+    previous_close: float
+    direction: str  # "up", "down", or "neutral"
+    last_updated: datetime
+
 # Position schemas
 class PositionBase(BaseModel):
     stock_id: int = Field(..., description="Stock ID")
