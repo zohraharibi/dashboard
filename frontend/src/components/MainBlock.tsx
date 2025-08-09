@@ -3,14 +3,12 @@ import { useSelectedStock, useStocks, usePositions, useWatchlist } from '../stor
 import { getStockQuote, getStockProfile, getStockChart } from '../store/actions/stockActions';
 import { buyShares, sellShares, fetchPositions } from '../store/actions/positionActions';
 import { fetchWatchlistItems, addToWatchlist, removeFromWatchlist } from '../store/actions/watchlistActions';
-
 import TradeModal from './TradeModal';
 import { toast } from 'react-toastify';
 
 const MainBlock: React.FC = () => {
   const { selectedStock } = useSelectedStock();
   const { 
-    stocks,
     currentQuote, 
     currentProfile, 
     currentChart, 
@@ -32,8 +30,8 @@ const MainBlock: React.FC = () => {
     watchlistDispatch(fetchWatchlistItems());
   }, [watchlistDispatch]);
 
-  // Use selected stock or first item from stocks array, otherwise show empty block
-  const stock = selectedStock || (stocks.length > 0 ? stocks[0] : null);
+  // Use selected stock or first item from watchlist, otherwise show empty block
+  const stock = selectedStock || (watchlistItems.length > 0 ? watchlistItems[0].stock : null);
 
   // Fetch stock data when stock changes
   useEffect(() => {
@@ -359,19 +357,30 @@ const MainBlock: React.FC = () => {
       <div className="row">
         <div className="col">
           <div className="d-flex justify-content-end gap-2">
-            {isFromTopbar ? (
-              // Show heart icon for watchlist toggle when stock is from topbar
-              <button 
-                className="btn px-5 main-block-action-btn d-flex align-items-center gap-2"
-                onClick={handleWatchlistToggle}
-              >
-                <span style={{ fontSize: '1.2em' }}>
-                  {isInWatchlist ? '❤️' : '🤍'}
-                </span>
-                {isInWatchlist ? 'REMOVE FROM WATCHLIST' : 'ADD TO WATCHLIST'}
-              </button>
+            {isFromTopbar || isInWatchlist ? (
+              // Show watchlist toggle button for topbar stocks OR watchlist items
+              <>
+                <button 
+                  className="btn px-5 main-block-action-btn d-flex align-items-center gap-2"
+                  onClick={handleWatchlistToggle}
+                >
+                  <span style={{ fontSize: '1.2em' }}>
+                    {isInWatchlist ? '❤️' : '🤍'}
+                  </span>
+                  {isInWatchlist ? 'REMOVE FROM WATCHLIST' : 'ADD TO WATCHLIST'}
+                </button>
+                {isInWatchlist && (
+                  // Show BUY button for watchlist items
+                  <button 
+                    className="btn px-5 main-block-action-btn"
+                    onClick={handleBuyClick}
+                  >
+                    BUY
+                  </button>
+                )}
+              </>
             ) : (
-              // Show traditional buy/sell buttons for stocks from positions/watchlist
+              // Show traditional buy/sell buttons for stocks from positions only
               <>
                 <button 
                   className={`btn px-5 main-block-action-btn ${!isInPositions ? 'disabled' : ''}`}
