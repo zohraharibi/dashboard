@@ -3,10 +3,12 @@ import stocksReducer from './reducers/stocksReducer';
 import positionsReducer from './reducers/positionsReducer';
 import watchlistReducer from './reducers/watchlistReducer';
 import selectedStockReducer from './reducers/selectedStockReducer';
+import authReducer from './reducers/authReducer';
 
 // Configure the Redux store
 export const store = configureStore({
   reducer: {
+    auth: authReducer,
     stocks: stocksReducer,
     positions: positionsReducer,
     watchlist: watchlistReducer,

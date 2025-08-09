@@ -13,7 +13,10 @@ class User(Base):
     username = Column(String(50), unique=True, index=True, nullable=False)
     full_name = Column(String(100), nullable=True)
     hashed_password = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    is_verified = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    last_login = Column(DateTime, nullable=True)
 
     # Relationships
     positions = relationship("Position", back_populates="user", cascade="all, delete-orphan")

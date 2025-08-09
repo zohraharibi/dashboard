@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../store/hooks';
+import { loginUser, signupUser } from '../../store/actions/authActions';
 import { handleApiError } from '../../services/api';
 
 const Login: React.FC = () => {
@@ -14,29 +15,27 @@ const Login: React.FC = () => {
     confirmPassword: '',
   });
 
-  const { login, signup, isLoading, error, clearError } = useAuth();
+  const { isLoading, error, dispatch } = useAuth();
 
   // Clear errors when component mounts or form switches
   useEffect(() => {
-    clearError();
-  }, [showSignup, clearError]);
+    // Clear error when switching between login/signup forms
+  }, [showSignup]);
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearError();
     
     try {
-      await login({ email, password });
+      await dispatch(loginUser({ email, password })).unwrap();
       // Navigation will be handled by ProtectedRoute
     } catch (error) {
-      // Error is handled by the context
+      // Error is handled by Redux state
       console.error('Login failed:', handleApiError(error));
     }
   };
 
   const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearError();
 
     // Validate passwords match
     if (signupData.password !== signupData.confirmPassword) {
@@ -46,15 +45,17 @@ const Login: React.FC = () => {
     }
 
     try {
-      await signup({
+      await dispatch(signupUser({
         email: signupData.email,
         username: signupData.username,
         full_name: signupData.full_name,
         password: signupData.password,
-      });
-      // Navigation will be handled by ProtectedRoute
+      })).unwrap();
+      // After successful signup, switch to login form
+      setShowSignup(false);
+      alert('Account created successfully! Please log in.');
     } catch (error) {
-      // Error is handled by the context
+      // Error is handled by Redux state
       console.error('Signup failed:', handleApiError(error));
     }
   };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { ActiveView } from './Pages/Dashboard';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../store/hooks';
+import { logoutUser } from '../store/actions/authActions';
 
 interface SidebarProps {
   activeView: ActiveView;
@@ -8,7 +9,7 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
-  const { user, logout } = useAuth();
+  const { user, dispatch } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Load theme from localStorage on component mount
@@ -105,7 +106,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
             <i className={`bi ${activeView === 'info' ? 'bi-arrow-left' : 'bi-question-circle'} fs-5`}></i>
           </button>
           <button 
-            onClick={logout}
+            onClick={() => dispatch(logoutUser())}
             className="nav-link text-muted mb-3"
             style={{ background: 'none', border: 'none' }}
             title="Logout"

@@ -6,6 +6,21 @@ import type { RootState, AppDispatch } from './index';
 export const useAppDispatch = () => useDispatch<AppDispatch>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
+// Auth hook
+export const useAuth = () => {
+  const dispatch = useAppDispatch();
+  const { user, token, isAuthenticated, isLoading, error } = useAppSelector((state) => state.auth);
+
+  return {
+    user,
+    token,
+    isAuthenticated,
+    isLoading,
+    error,
+    dispatch,
+  };
+};
+
 // Custom hooks for each slice
 export const useStocks = () => {
   const dispatch = useAppDispatch();
