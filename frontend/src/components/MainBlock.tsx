@@ -5,6 +5,7 @@ import { buyShares, sellShares, fetchPositions } from '../store/actions/position
 import { fetchWatchlistItems, addToWatchlist, removeFromWatchlist } from '../store/actions/watchlistActions';
 import TradeModal from './TradeModal';
 import { toast } from 'react-toastify';
+import { LineChart } from '@mui/x-charts/LineChart';
 
 const MainBlock: React.FC = () => {
   const { selectedStock } = useSelectedStock();
@@ -244,24 +245,29 @@ const MainBlock: React.FC = () => {
                 </div>
               </div>
             ) : currentChart ? (
-              <svg width="100%" height="160" className="main-block-chart-svg" viewBox={currentChart.viewBox}>
-                <rect width="100%" height="100%" fill="url(#grid)" />
-                <polyline
-                  fill="none"
-                  stroke="#20c997"
-                  strokeWidth="2"
-                  points={currentChart.points}
+                <LineChart
+                  width={800}
+                  height={200}
+                  series={[
+                    {
+                      data: currentChart.y_values,
+                      color: '#20c997',
+                      showMark: false,
+                      curve: 'linear'
+                    }
+                  ]}
+                  xAxis={[{ 
+                    disableLine: true, 
+                    disableTicks: true,
+                    tickLabelStyle: { display: 'none' },
+                    data: currentChart.y_values.map((_, index) => index)
+                  }]}
+                  yAxis={[{ 
+                    disableLine: true, 
+                    disableTicks: true,
+                    tickLabelStyle: { display: 'none' }
+                  }]}
                 />
-                {currentChart.points && (() => {
-                  const points = currentChart.points.split(' ');
-                  const lastPoint = points[points.length - 1];
-                  if (lastPoint) {
-                    const [x, y] = lastPoint.split(',');
-                    return <circle cx={x} cy={y} r="2" fill="#20c997" />;
-                  }
-                  return null;
-                })()}
-              </svg>
             ) : null}
           </div>
         </div>

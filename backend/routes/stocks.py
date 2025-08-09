@@ -65,12 +65,12 @@ async def get_stock_by_symbol(
     return stock
 
 @router.get("/chart/{symbol}/{timeframe}")
-async def get_stock_chart_svg(
+async def get_stock_chart_data(
     symbol: str,
     timeframe: str = Path(..., regex="^(1D|1W|1Y|5Y)$"),
     db: Session = Depends(get_db),
 ):
-    """Returns chart data in SVG points format (x,y x,y x,y)"""
+    """Returns stock chart data as an array of Y values (prices)"""
     # Verify stock exists
     stock = db.query(Stock).filter(Stock.symbol == symbol.upper()).first()
     if not stock:
@@ -78,10 +78,10 @@ async def get_stock_chart_svg(
 
     # Configure timeframe
     timeframe_config = {
-        "1D": {"points": 24, "x_step": 20},  # 24 points, 20px apart
-        "1W": {"points": 28, "x_step": 20},  # 28 points (4 weeks)
-        "1Y": {"points": 12, "x_step": 30},  # 12 months
-        "5Y": {"points": 5, "x_step": 50}    # 5 years
+        "1D": {"points": 24},  # 24 points (hourly for 1 day)
+        "1W": {"points": 7},  # 28 points (daily for 4 weeks)
+        "1Y": {"points": 12},  # 12 points (monthly for 1 year)
+        "5Y": {"points": 60}    # 5 points (yearly for 5 years)
     }
     
     config = timeframe_config.get(timeframe)
@@ -98,12 +98,10 @@ async def get_stock_chart_svg(
     base_price = 50 + (seed % 200)  # Price between 50-250
     volatility = 0.1 + (seed % 30) / 100  # Volatility between 0.1-0.4
     
-    points = []
+    y_values = []
     current_price = base_price
     
-    for i in range(config["points"]):
-        x = i * config["x_step"]
-        
+    for _ in range(config["points"]):
         # Add some realistic price movement
         change_percent = (random.random() - 0.5) * volatility
         current_price = current_price * (1 + change_percent)
@@ -111,15 +109,12 @@ async def get_stock_chart_svg(
         # Keep price within reasonable bounds
         current_price = max(10, min(500, current_price))
         
-        # Convert price to y-coordinate (invert for SVG)
-        y = 150 - (current_price / 500 * 120)  # Scale to fit in 150px height
-        points.append(f"{x},{round(y,1)}")
+        y_values.append(round(current_price, 2))  # Store just the price (Y value)
     
     return {
         "symbol": symbol.upper(),
         "timeframe": timeframe,
-        "points": " ".join(points),
-        "viewBox": f"0 0 {config['points'] * config['x_step']} 150"
+        "y_values": y_values,  # Array of prices (Y values)
     }
 
 @router.get("/{stock_id}", response_model=StockResponse)

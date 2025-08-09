@@ -98,8 +98,7 @@ export interface StockProfile {
 export interface ChartData {
   symbol: string;
   timeframe: string;
-  points: string;
-  viewBox: string;
+  y_values: number[];
 }
 
 // Redux state type

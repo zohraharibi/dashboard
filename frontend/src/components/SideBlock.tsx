@@ -7,6 +7,7 @@ import { setSelectedStock } from '../store/reducers/selectedStockReducer';
 import type { Position } from '../store/types/positionTypes';
 import type { WatchlistItem } from '../store/types/watchlistTypes';
 import type { ChartData } from '../store/types/stockTypes';
+import { LineChart } from '@mui/x-charts/LineChart';
 
 const SideBlock: React.FC = () => {
   const { positions, dispatch: positionsDispatch } = usePositions();
@@ -59,8 +60,6 @@ const SideBlock: React.FC = () => {
     });
   }, [allSymbols, fetchChartData]);
 
-
-
   // Memoized click handlers
   const handlePositionClick = useCallback((position: Position) => {
     selectedStockDispatch(setSelectedStock({
@@ -75,22 +74,6 @@ const SideBlock: React.FC = () => {
       stockId: watchlistItem.stock.id
     }));
   }, [selectedStockDispatch]);
-
-  // Memoized scaled chart points
-  const getScaledPoints = useCallback((points: string = "", targetWidth: number = 60, targetHeight: number = 20): string => {
-    if (!points) return "";
-    
-    try {
-      return points.split(' ').map(point => {
-        const [x, y] = point.split(',').map(Number);
-        const scaledX = (x / 360) * targetWidth;
-        const scaledY = (y / 150) * targetHeight;
-        return `${scaledX.toFixed(1)},${scaledY.toFixed(1)}`;
-      }).join(' ');
-    } catch {
-      return "";
-    }
-  }, []);
 
   return (
     <div className="watchlist-container px-2">
@@ -112,15 +95,34 @@ const SideBlock: React.FC = () => {
                 </div>
                 <div className="watchlist-item-center d-flex align-items-center">
                   <div className="watchlist-chart">
-                    <svg width="60" height="20" className="position-relative">
-                      <polyline
-                        fill="none"
-                        stroke="var(--chart-positive)"
-                        strokeWidth="1.5"
-                        points={getScaledPoints(chartData[item.stock.symbol]?.points)}
-                        // vectorEffect="non-scaling-stroke"
+                    {chartData[item.stock.symbol]?.y_values && chartData[item.stock.symbol].y_values.length > 0 ? (
+                      <LineChart
+                        width={120}
+                        height={60}
+                        series={[
+                          {
+                            data: chartData[item.stock.symbol].y_values,
+                            color: '#20c997'
+                          }
+                        ]}
+                        margin={{ left: 15, right: 15, top: 15, bottom: 15 }}
+                        xAxis={[{ 
+                          hideTooltip: true, 
+                          disableLine: true, 
+                          disableTicks: true,
+                          data: chartData[item.stock.symbol].y_values.map((_, index) => index)
+                        }]}
+                        yAxis={[{ 
+                          hideTooltip: true, 
+                          disableLine: true, 
+                          disableTicks: true
+                        }]}
                       />
-                    </svg>
+                    ) : (
+                      <div style={{ width: '120px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#999' }}>
+                        {isLoading[item.stock.symbol] ? 'Loading...' : 'No chart'}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="watchlist-item-right text-end">
@@ -152,15 +154,38 @@ const SideBlock: React.FC = () => {
                 </div>
                 <div className="watchlist-item-center d-flex align-items-center">
                   <div className="watchlist-chart">
-                    <svg width="80" height="30" className="position-relative">
-                      <polyline
-                        fill="none"
-                        stroke="var(--chart-positive)"
-                        strokeWidth="1.5"
-                        points={getScaledPoints(chartData[item.stock.symbol]?.points)}
-                        vectorEffect="non-scaling-stroke"
+                    {chartData[item.stock.symbol]?.y_values && chartData[item.stock.symbol].y_values.length > 0 ? (
+                      <LineChart
+                        width={200}
+                        height={100}
+                        series={[
+                          {
+                            data: chartData[item.stock.symbol].y_values,
+                            color: '#20c997',
+                            showMark: false,
+                            curve: 'linear'
+                          }
+                        ]}
+                        margin={{ left: 15, right: 15, top: 15}}
+                        xAxis={[{ 
+                          hideTooltip: true, 
+                          disableLine: true, 
+                          disableTicks: true,
+                          data: chartData[item.stock.symbol].y_values.map((_, index) => index),
+                          tickLabelStyle: { display: 'none' }
+                        }]}
+                        yAxis={[{ 
+                          hideTooltip: true, 
+                          disableLine: true, 
+                          disableTicks: true,
+                          tickLabelStyle: { display: 'none' },
+                        }]}
                       />
-                    </svg>
+                    ) : (
+                      <div style={{ width: '120px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', color: '#999' }}>
+                        {isLoading[item.stock.symbol] ? 'Loading...' : 'No chart'}
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="watchlist-item-right text-end">
