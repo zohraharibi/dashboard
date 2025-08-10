@@ -2,7 +2,7 @@
 
 A modern, full-stack trading simulation platform built with React and FastAPI, featuring real-time stock data, portfolio management, and comprehensive trading tools.
 
-**Live Demo**: [Deployed on Render](https://your-app-name.onrender.com)
+**Live Demo**: [Deployed on Render, Click here to test it](https://dashboard-frontend-n88x.onrender.com)
 
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)  
 ![React](https://img.shields.io/badge/React-18.x-blue)  
@@ -61,7 +61,31 @@ A modern, full-stack trading simulation platform built with React and FastAPI, f
 - JWT-based authentication system  
 - Secure user registration and login  
 - Protected routes and API endpoints  
-- Session management with token validation  
+- Session management with token validation
+
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/62e92365-c8d2-416f-b6b3-1c11a5b75939" />
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3adab3d8-8449-414d-980f-52d713ca853f" />
+
+
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9eed00a6-dffa-4d70-8264-f2ba87bcd364" />
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/35c9cd0c-d062-4e0b-9b56-0f80b40d39f5" />
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e6e59b89-1232-4e03-af63-931edee02055" />
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/dbb80736-9f7b-4fcc-8626-a6bbe1bf4e28" />
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/63e0efca-74f6-498c-9191-19ec3eac223b" />
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b21f777f-96bb-415a-bb72-573bb055eecb" />
+
+
+
+
+
+
+
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/abbc008a-7a28-4369-8035-a5bfd4cea019" />
+  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c8a8c237-4f0c-4256-8e70-6b64988fb6c6" />
+
+
+
+
 
 ## Tech Stack
 
@@ -74,7 +98,7 @@ A modern, full-stack trading simulation platform built with React and FastAPI, f
 
 ### Backend
 - FastAPI with Python 3.8+  
-- PostgreSQL database  
+- PostgreSQL database
 - SQLAlchemy ORM  
 - JWT authentication  
 - bcrypt for password hashing  
@@ -118,14 +142,10 @@ ALPHA_VANTAGE_API_KEY=your-alpha-vantage-api-key
 ```
 
 #### Database Setup
-```bash
-createdb trading_db
-python -c "from database import engine, Base; Base.metadata.create_all(bind=engine)"
-```
-
+I have used a remote database 
 #### Start Backend Server
 ```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+python start_server.py
 ```
 
 ### Frontend Setup
@@ -265,48 +285,81 @@ CREATE TABLE trade_history (
 | `ALPHA_VANTAGE_API_KEY` | Alpha Vantage API key | ✅ |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | JWT token expiration | ❌ |
 
-## Testing
+## API Documentation
 
-### Backend
+The Trading Dashboard provides a comprehensive REST API with the following endpoints:
+
+### Authentication Endpoints (`/auth`)
+- `POST /auth/register` - Register a new user account
+- `POST /auth/login` - User login and JWT token generation
+- `GET /auth/me` - Get current authenticated user information
+- `PUT /auth/me` - Update user profile details
+
+### Stock Management (`/stocks`)
+- `GET /stocks/` - Retrieve all available stocks
+- `GET /stocks/{stock_id}` - Get specific stock by ID
+- `GET /stocks/symbol/{symbol}` - Get stock information by symbol (e.g., AAPL)
+- `GET /stocks/search/{query}` - Search stocks by name or symbol
+- `POST /stocks/` - Create new stock entry (admin only)
+- `PUT /stocks/{stock_id}` - Update stock information (admin only)
+- `DELETE /stocks/{stock_id}` - Remove stock from system (admin only)
+
+### Portfolio & Positions (`/positions`)
+- `GET /positions/` - Get user's current stock positions
+- `GET /positions/portfolio` - Get complete portfolio summary with totals
+- `GET /positions/{position_id}` - Get specific position details
+- `POST /positions/` - Buy stock (create new position)
+- `PUT /positions/{position_id}` - Update existing position
+- `DELETE /positions/{position_id}` - Sell entire position
+- `POST /positions/{position_id}/sell` - Sell specific quantity from position
+
+### Watchlist Management (`/watchlist`)
+- `GET /watchlist/` - Get user's watchlist items
+- `GET /watchlist/summary` - Get watchlist summary with statistics
+- `GET /watchlist/{watchlist_id}` - Get specific watchlist item
+- `POST /watchlist/` - Add stock to watchlist by stock ID
+- `POST /watchlist/symbol/{symbol}` - Add stock to watchlist by symbol
+- `PUT /watchlist/{watchlist_id}` - Update watchlist item notes
+- `DELETE /watchlist/{watchlist_id}` - Remove item from watchlist
+- `DELETE /watchlist/symbol/{symbol}` - Remove stock from watchlist by symbol
+
+### Trade History (`/trade-history`)
+- `GET /trade-history/` - Get complete trading history for user
+
+### System Endpoints
+- `GET /` - API root with basic information and available endpoints
+- `GET /health` - Health check endpoint for monitoring
+- `GET /docs` - Interactive API documentation (Swagger UI)
+
+### API Features
+- **Authentication**: JWT-based authentication for secure access
+- **Authorization**: User-specific data access and admin-only operations
+- **Real-time Data**: Integration with Finnhub for live stock prices
+- **Documentation**: Auto-generated OpenAPI documentation
+
+### Example Usage
+<img width="1920" height="1041" alt="get_all_watchlists" src="https://github.com/user-attachments/assets/52cea056-a4b7-4ff4-9b98-af9c0e90640f" />
+
 ```bash
-cd backend
-pytest
+# Get user's portfolio
+curl -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  "http://localhost:8000/positions/portfolio"
+
+# Add stock to watchlist
+curl -X POST "http://localhost:8000/watchlist/symbol/TSLA" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"notes": "Monitoring for entry point"}'
+
+# Buy shares
+curl -X POST "http://localhost:8000/positions/" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"stock_id": 1, "quantity": 10, "purchase_price": 150.00}'
 ```
 
-### Frontend
-```bash
-cd frontend
-npm test
-```
 
-## Deployment
+<div align="center">
+  <strong>Built with ❤️ by Fortaegis Technologies B.V</strong>
+</div>
 
-### Production Build
-
-#### Frontend
-```bash
-cd frontend
-npm run build
-```
-
-#### Backend
-```bash
-cd backend
-pip install gunicorn
-gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker
-```
-
-### Docker
-```bash
-docker-compose up --build
-```
-
-## Contributing
-1. Fork the repository  
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)  
-3. Commit changes (`git commit -m 'Add amazing feature'`)  
-4. Push (`git push origin feature/amazing-feature`)  
-5. Open a Pull Request  
-
-## License
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file.
