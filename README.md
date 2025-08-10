@@ -196,6 +196,8 @@ trading-dashboard/
 ## Database Schema
 
 ### Core Tables
+<img width="947" height="786" alt="image" src="https://github.com/user-attachments/assets/31913a52-5c4b-4217-ae68-9fff926b0c4c" />
+
 
 #### Users Table
 ```sql
