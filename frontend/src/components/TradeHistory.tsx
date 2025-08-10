@@ -28,11 +28,9 @@ const TradeHistory: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="">
-        <div className="d-flex justify-content-center align-items-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
+      <div className="d-flex justify-content-center align-items-center h-100" style={{ minHeight: '400px' }}>
+        <div className="spinner-border text-success" role="status">
+          <span className="visually-hidden">Loading trades...</span>
         </div>
       </div>
     );
