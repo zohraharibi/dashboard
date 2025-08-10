@@ -8,6 +8,7 @@ import type { Position } from '../store/types/positionTypes';
 import type { WatchlistItem } from '../store/types/watchlistTypes';
 import type { ChartData } from '../store/types/stockTypes';
 import { LineChart } from '@mui/x-charts/LineChart';
+import { formatCurrency } from '../utils/helpers/formatters';
 
 const SideBlock: React.FC = () => {
   const { positions, dispatch: positionsDispatch } = usePositions();
@@ -153,7 +154,7 @@ const SideBlock: React.FC = () => {
                   </div>
                 </div>
                 <div className="watchlist-item-right text-end">
-                  <div className="watchlist-item-price positive">{item.total_value}</div>
+                  <div className="watchlist-item-price positive">{formatCurrency(item.total_value, item.stock.currency)}</div>
                 </div>
               </div>
             </div>
@@ -232,7 +233,7 @@ const SideBlock: React.FC = () => {
                     </div>
                   </div>
                   <div className="watchlist-item-right text-end">
-                    <div className="watchlist-item-price positive">{currentPrice}</div>
+                    <div className="watchlist-item-price positive">{formatCurrency(currentPrice, item.stock.currency)}</div>
                   </div>
                 </div>
               </div>

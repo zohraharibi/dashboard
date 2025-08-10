@@ -6,6 +6,7 @@ import { fetchWatchlistItems, addToWatchlist, removeFromWatchlist } from '../sto
 import TradeModal from './TradeModal';
 import { toast } from 'react-toastify';
 import { LineChart } from '@mui/x-charts/LineChart';
+import { formatCurrency } from '../utils/helpers/formatters';
 
 const MainBlock: React.FC = () => {
   const { selectedStock } = useSelectedStock();
@@ -191,14 +192,14 @@ const MainBlock: React.FC = () => {
       <div className="row mb-2">
         <div className="col-8">
           <h2 className="main-block-portfolio-value text-xl">
-            {isQuoteLoading ? 'Loading...' : currentQuote ? `$${currentQuote.current_price.toFixed(2)}` : '$1037.40'}
+            {isQuoteLoading ? 'Loading...' : currentQuote ? formatCurrency(currentQuote.current_price, stock?.currency || 'USD') : '$1037.40'}
           </h2>
           <div className="main-block-performance">
             {isQuoteLoading ? (
               <span className="performance-today text-muted">Loading performance...</span>
             ) : currentQuote ? (
               <span className={`performance-today ${currentQuote.direction === 'up' ? 'text-success' : currentQuote.direction === 'down' ? 'text-danger' : 'text-muted'}`}>
-                {currentQuote.change > 0 ? '+' : ''}{currentQuote.change.toFixed(2)} ({currentQuote.percent_change > 0 ? '+' : ''}{currentQuote.percent_change.toFixed(2)}%) Today
+                {currentQuote.change > 0 ? '+' : ''}{formatCurrency(Math.abs(currentQuote.change), stock?.currency || 'USD').replace(/^./, '')} ({currentQuote.percent_change > 0 ? '+' : ''}{currentQuote.percent_change.toFixed(2)}%) Today
               </span>
             ) : (
               <span className="performance-today text-success">31.96 (+3.18%) Today</span>
