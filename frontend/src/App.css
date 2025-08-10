@@ -951,7 +951,6 @@ body {
   height: 20px;
   width: 100%;
   position: relative;
-  border-radius: 4px;
 }
 
 .watchlist-item-left {
@@ -981,6 +980,11 @@ body {
 
 .topbar-content {
   gap: 1.5rem;
+  transform: scale(1.05); 
+}
+
+.topbar-content:hover {
+  transition: transform 0.2s ease;
 }
 
 .topbar-label {
@@ -1242,6 +1246,29 @@ body {
 .trade-btn-confirm:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+/* Trade History Colors - Using CSS Custom Properties */
+.trade-badge-buy {
+  background-color: var(--success);
+  color: white;
+}
+
+.trade-badge-sell {
+  background-color: var(--danger);
+  color: white;
+}
+
+.trade-amount-positive {
+  color: var(--success) !important;
+}
+
+.trade-amount-negative {
+  color: var(--danger) !important;
+}
+
+.trade-summary-value {
+  color: var(--text-primary) !important;
 }
 
 /* Trade Message Styles */
@@ -1543,9 +1570,11 @@ html, body, #root {
 .watchlist-item {
   padding: 0.5rem;
   border-radius: 4px;
-  transition: background-color 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
 .watchlist-item:hover {
   background-color: var(--bg-secondary);
+  transform: scale(1.05); 
 }
+

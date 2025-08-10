@@ -89,6 +89,30 @@ export const useSelectedStock = () => {
   };
 };
 
+export const useMarket = () => {
+  const dispatch = useAppDispatch();
+  const { quotes, isLoading, error } = useAppSelector((state) => state.market);
+
+  return {
+    quotes,
+    isLoading,
+    error,
+    dispatch,
+  };
+};
+
+export const useTradeHistory = () => {
+  const dispatch = useAppDispatch();
+  const { trades, isLoading, error } = useAppSelector((state) => state.tradeHistory);
+
+  return {
+    trades,
+    isLoading,
+    error,
+    dispatch,
+  };
+};
+
 // Combined hook for dashboard usage
 export const useDashboard = () => {
   const stocks = useStocks();

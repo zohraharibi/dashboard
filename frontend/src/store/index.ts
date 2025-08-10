@@ -4,6 +4,8 @@ import positionsReducer from './reducers/positionsReducer';
 import watchlistReducer from './reducers/watchlistReducer';
 import selectedStockReducer from './reducers/selectedStockReducer';
 import authReducer from './reducers/authReducer';
+import marketReducer from './reducers/marketReducer';
+import tradeHistoryReducer from './reducers/tradeHistoryReducer';
 
 // Configure the Redux store
 export const store = configureStore({
@@ -13,6 +15,8 @@ export const store = configureStore({
     positions: positionsReducer,
     watchlist: watchlistReducer,
     selectedStock: selectedStockReducer,
+    market: marketReducer,
+    tradeHistory: tradeHistoryReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

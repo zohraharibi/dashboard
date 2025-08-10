@@ -1,63 +1,13 @@
-import React, { useEffect, useState } from 'react';
-
-interface TradeHistoryItem {
-  id: number;
-  trade_type: 'BUY' | 'SELL';
-  quantity: number;
-  price_per_share: number;
-  total_amount: number;
-  trade_date: string;
-  notes?: string;
-  stock: {
-    symbol: string;
-    name: string;
-  };
-}
+import React, { useEffect } from 'react';
+import { useTradeHistory } from '../store/hooks';
+import { fetchTradeHistory } from '../store/actions/tradeHistoryActions';
 
 const TradeHistory: React.FC = () => {
-  const [trades, setTrades] = useState<TradeHistoryItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { trades, isLoading, error, dispatch } = useTradeHistory();
 
   useEffect(() => {
-    fetchTradeHistory();
-  }, []);
-
-  const fetchTradeHistory = async () => {
-    try {
-      setIsLoading(true);
-      const token = localStorage.getItem('token');
-      
-      if (!token) {
-        throw new Error('Authentication token not found. Please log in again.');
-      }
-
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/trade-history/`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.status === 401) {
-        // Token is invalid or expired
-        localStorage.removeItem('token');
-        throw new Error('Session expired. Please log in again.');
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Server error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setTrades(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    dispatch(fetchTradeHistory());
+  }, [dispatch]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -121,37 +71,37 @@ const TradeHistory: React.FC = () => {
                 </div>
               ) : (
                 <div className="table-responsive">
-                  <table className="table table-hover mb-0">
-                    <thead className="table-light">
+                  <table className="table table-sm table-borderless main-block-stats-table mb-0">
+                    <thead>
                       <tr>
-                        <th className="border-0 px-4 py-3">Date</th>
-                        <th className="border-0 px-4 py-3">Stock</th>
-                        <th className="border-0 px-4 py-3">Type</th>
-                        <th className="border-0 px-4 py-3 text-end">Quantity</th>
-                        <th className="border-0 px-4 py-3 text-end">Price</th>
-                        <th className="border-0 px-4 py-3 text-end">Total</th>
+                        <th className="px-4 py-2 text-muted">Date</th>
+                        <th className="px-4 py-2 text-muted">Stock</th>
+                        <th className="px-4 py-2 text-muted">Type</th>
+                        <th className="px-4 py-2 text-muted text-end">Quantity</th>
+                        <th className="px-4 py-2 text-muted text-end">Price</th>
+                        <th className="px-4 py-2 text-muted text-end">Total</th>
                       </tr>
                     </thead>
                     <tbody>
                       {trades.map((trade) => (
                         <tr key={trade.id} className="border-bottom">
                           <td className="px-4 py-3">
-                            <div className="text-dark fw-medium">
+                            <div className="text-secondary fw-medium">
                               {formatDate(trade.trade_date)}
                             </div>
                           </td>
                           <td className="px-4 py-3">
                             <div>
-                              <div className="fw-bold text-dark">{trade.stock.symbol}</div>
+                              <div className="fw-bold text-secondary">{trade.stock.symbol}</div>
                               <div className="text-muted small">{trade.stock.name}</div>
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <span className={`badge ${
+                            <span className={`badge px-3 py-2 ${
                               trade.trade_type === 'BUY' 
-                                ? 'bg-success bg-opacity-10 text-success' 
-                                : 'bg-danger bg-opacity-10 text-danger'
-                            } px-3 py-2`}>
+                                ? 'trade-badge-buy' 
+                                : 'trade-badge-sell'
+                            }`}>
                               {trade.trade_type}
                             </span>
                           </td>
@@ -163,7 +113,7 @@ const TradeHistory: React.FC = () => {
                           </td>
                           <td className="px-4 py-3 text-end">
                             <span className={`fw-bold ${
-                              trade.trade_type === 'BUY' ? 'text-danger' : 'text-success'
+                              trade.trade_type === 'BUY' ? 'trade-amount-negative' : 'trade-amount-positive'
                             }`}>
                               {trade.trade_type === 'BUY' ? '-' : '+'}{formatCurrency(trade.total_amount)}
                             </span>
@@ -181,11 +131,11 @@ const TradeHistory: React.FC = () => {
                 <div className="row text-center">
                   <div className="col-3">
                     <div className="text-muted small">Total Trades</div>
-                    <div className="fw-bold text-dark">{trades.length}</div>
+                    <div className="fw-bold trade-summary-value">{trades.length}</div>
                   </div>
                   <div className="col-3">
                     <div className="text-muted small">Total Bought</div>
-                    <div className="fw-bold text-danger">
+                    <div className="fw-bold trade-amount-negative">
                       {formatCurrency(
                         trades
                           .filter(t => t.trade_type === 'BUY')
@@ -195,7 +145,7 @@ const TradeHistory: React.FC = () => {
                   </div>
                   <div className="col-3">
                     <div className="text-muted small">Total Sold</div>
-                    <div className="fw-bold text-success">
+                    <div className="fw-bold trade-amount-positive">
                       {formatCurrency(
                         trades
                           .filter(t => t.trade_type === 'SELL')
@@ -214,7 +164,7 @@ const TradeHistory: React.FC = () => {
                           .filter(t => t.trade_type === 'SELL')
                           .reduce((sum, t) => sum + t.total_amount, 0);
                         const netGainLoss = totalSold - totalBought;
-                        return netGainLoss >= 0 ? 'text-success' : 'text-danger';
+                        return netGainLoss >= 0 ? 'trade-amount-positive' : 'trade-amount-negative';
                       })()
                     }`}>
                       {(() => {

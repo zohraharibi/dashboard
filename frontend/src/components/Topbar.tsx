@@ -1,71 +1,28 @@
-import React, { useEffect, useState } from 'react';
-import { useStocks, useSelectedStock } from '../store/hooks';
+import React, { useEffect } from 'react';
+import { useStocks, useSelectedStock, useMarket } from '../store/hooks';
 import { fetchStocks } from '../store/actions/stockActions';
+import { fetchMarketQuotes } from '../store/actions/marketActions';
 import { setSelectedStock } from '../store/reducers/selectedStockReducer';
-
-interface StockQuote {
-  symbol: string;
-  current_price: number;
-  change: number;
-  percent_change: number;
-  direction: 'up' | 'down' | 'neutral';
-}
 
 const Topbar: React.FC = () => {
   const { stocks, dispatch } = useStocks();
   const { dispatch: selectedStockDispatch } = useSelectedStock();
-  const [quotes, setQuotes] = useState<StockQuote[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { quotes, isLoading, dispatch: marketDispatch } = useMarket();
 
   // Fetch stocks from database first
   useEffect(() => {
     dispatch(fetchStocks());
   }, [dispatch]);
 
-  // Fetch quotes for database stocks
+  // Fetch quotes for database stocks using Redux
   useEffect(() => {
     if (stocks.length > 0) {
-      fetchQuotesForStocks();
-    }
-  }, [stocks]);
-
-  const fetchQuotesForStocks = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
       // Take first 6 stocks from database for topbar display
       const stocksToShow = stocks.slice(0, 6);
-
-      const quotePromises = stocksToShow.map(async (stock) => {
-        try {
-          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/stocks/${stock.symbol}/quote`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json',
-            },
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            return { symbol: stock.symbol, ...data };
-          }
-          return null;
-        } catch (error) {
-          console.error(`Error fetching quote for ${stock.symbol}:`, error);
-          return null;
-        }
-      });
-
-      const results = await Promise.all(quotePromises);
-      const validQuotes = results.filter((quote): quote is StockQuote => quote !== null);
-      setQuotes(validQuotes);
-    } catch (error) {
-      console.error('Error fetching market quotes:', error);
-    } finally {
-      setIsLoading(false);
+      const symbols = stocksToShow.map(stock => stock.symbol);
+      marketDispatch(fetchMarketQuotes({ symbols }));
     }
-  };
+  }, [stocks, marketDispatch]);
 
   const formatPrice = (price: number) => `$${price.toFixed(2)}`;
   const formatChange = (change: number, percent: number) => {
