@@ -102,7 +102,9 @@ const SideBlock: React.FC = () => {
                         series={[
                           {
                             data: chartData[item.stock.symbol].y_values,
-                            color: '#20c997'
+                            color: '#20c997',
+                            showMark: false,
+                            curve: 'linear'
                           }
                         ]}
                         margin={{ left: 15, right: 15, top: 15, bottom: 15 }}
@@ -110,12 +112,14 @@ const SideBlock: React.FC = () => {
                           hideTooltip: true, 
                           disableLine: true, 
                           disableTicks: true,
-                          data: chartData[item.stock.symbol].y_values.map((_, index) => index)
+                          data: chartData[item.stock.symbol].y_values.map((_, index) => index),
+                          tickLabelStyle: { display: 'none' }
                         }]}
                         yAxis={[{ 
                           hideTooltip: true, 
                           disableLine: true, 
-                          disableTicks: true
+                          disableTicks: true,
+                          tickLabelStyle: { display: 'none' },
                         }]}
                       />
                     ) : (

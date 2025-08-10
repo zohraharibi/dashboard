@@ -798,7 +798,6 @@ body {
 
 .main-block-chart-container {
   height: 180px;
-  background-color: var(--bg-secondary);
   position: relative;
 }
 
@@ -952,7 +951,6 @@ body {
   height: 20px;
   width: 100%;
   position: relative;
-  background-color: var(--bg-secondary);
   border-radius: 4px;
 }
 

@@ -251,7 +251,7 @@ const MainBlock: React.FC = () => {
                   series={[
                     {
                       data: currentChart.y_values,
-                      color: '#20c997',
+                      color: 'var(--primary-green)',
                       showMark: false,
                       curve: 'linear'
                     }
