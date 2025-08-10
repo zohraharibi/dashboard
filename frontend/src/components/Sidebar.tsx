@@ -59,19 +59,34 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
       <nav className="flex-grow-1 py-3">
         <ul className="nav nav-pills flex-column align-items-center">
           <li className="nav-item mb-3">
-            <a href="#" className="nav-link sidebar-nav-active">
+            <button 
+              onClick={() => onViewChange('dashboard')}
+              className={`nav-link ${activeView === 'dashboard' ? 'sidebar-nav-active' : 'sidebar-nav-secondary'}`}
+              style={{ background: 'none', border: 'none' }}
+              title="Dashboard"
+            >
               <i className="bi bi-pie-chart fs-5"></i>
-            </a>
+            </button>
           </li>
           <li className="nav-item mb-3">
-            <a href="#" className="nav-link sidebar-nav-secondary">
+            <button 
+              onClick={() => onViewChange('trade-history')}
+              className={`nav-link ${activeView === 'trade-history' ? 'sidebar-nav-active' : 'sidebar-nav-secondary'}`}
+              style={{ background: 'none', border: 'none' }}
+              title="Trade History"
+            >
               <i className="bi bi-clock-history fs-5"></i>
-            </a>
+            </button>
           </li>
           <li className="nav-item mb-3">
-            <a href="#" className="nav-link text-muted">
+            <button 
+              onClick={() => onViewChange('info')}
+              className={`nav-link ${activeView === 'info' ? 'sidebar-nav-active' : 'sidebar-nav-secondary'}`}
+              style={{ background: 'none', border: 'none' }}
+              title="Info"
+            >
               <i className="bi bi-grid fs-5"></i>
-            </a>
+            </button>
           </li>
         </ul>
       </nav>
@@ -86,14 +101,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
           >
             <i className={`bi ${isDarkMode ? 'bi-sun' : 'bi-moon'} fs-5`}></i>
           </button>
-          <button 
-            onClick={() => onViewChange(activeView === 'trade-history' ? 'dashboard' : 'trade-history')}
-            className={`nav-link text-muted mb-3 ${activeView === 'trade-history' ? 'sidebar-nav-active' : ''}`}
-            style={{ background: 'none', border: 'none' }}
-            title={activeView === 'trade-history' ? 'Back to Dashboard' : 'Trade History'}
-          >
-            <i className={`bi ${activeView === 'trade-history' ? 'bi-arrow-left' : 'bi-gear'} fs-5`}></i>
-          </button>
+          <a href="#" className="nav-link text-muted mb-3" title="Settings">
+            <i className="bi bi-gear fs-5"></i>
+          </a>
           <button 
             onClick={() => onViewChange(activeView === 'info' ? 'dashboard' : 'info')}
             className={`nav-link text-muted mb-3 ${activeView === 'info' ? 'sidebar-nav-active' : ''}`}
@@ -104,7 +114,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
           </button>
           <button 
             onClick={() => dispatch(logoutUser())}
-            className="nav-link text-muted mb-3"
+            className="nav-link sidebar-nav-active mb-3 logout-btn"
             style={{ background: 'none', border: 'none' }}
             title="Logout"
           >

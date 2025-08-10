@@ -19,7 +19,7 @@ const initialState: StocksState = {
   currentStock: null,
   currentQuote: null,
   currentProfile: null,
-  currentChart: null,
+  chartData: {},
   isLoading: false,
   isQuoteLoading: false,
   isProfileLoading: false,
@@ -43,7 +43,7 @@ const stocksSlice = createSlice({
       state.currentProfile = null;
     },
     clearCurrentChart: (state) => {
-      state.currentChart = null;
+      state.chartData = {};
     },
     clearError: (state) => {
       state.error = null;
@@ -214,7 +214,8 @@ const stocksSlice = createSlice({
       })
       .addCase(getStockChart.fulfilled, (state, action) => {
         state.isChartLoading = false;
-        state.currentChart = action.payload;
+        const chartKey = `${action.payload.symbol}-${action.payload.timeframe}`;
+        state.chartData[chartKey] = action.payload;
         state.error = null;
       })
       .addCase(getStockChart.rejected, (state, action) => {

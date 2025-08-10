@@ -11,9 +11,10 @@ import { formatCurrency } from '../utils/helpers/formatters';
 const MainBlock: React.FC = () => {
   const { selectedStock } = useSelectedStock();
   const { 
+    stocks,
     currentQuote, 
     currentProfile, 
-    currentChart, 
+    getChartData, 
     isQuoteLoading, 
     isProfileLoading, 
     isChartLoading, 
@@ -32,8 +33,8 @@ const MainBlock: React.FC = () => {
     watchlistDispatch(fetchWatchlistItems());
   }, [watchlistDispatch]);
 
-  // Use selected stock or first item from watchlist, otherwise show empty block
-  const stock = selectedStock || (watchlistItems.length > 0 ? watchlistItems[0].stock : null);
+  // Use selected stock or first item from stocks array, otherwise show empty block
+  const stock = selectedStock || (stocks.length > 0 ? stocks[0] : null);
 
   // Fetch quote and profile data only when stock changes
   useEffect(() => {
@@ -48,7 +49,7 @@ const MainBlock: React.FC = () => {
     if (stock?.symbol) {
       stocksDispatch(getStockChart({ symbol: stock.symbol, timeframe: selectedTimeframe }));
     }
-  }, [stock?.symbol, selectedTimeframe, stocksDispatch]);
+  }, [stock?.symbol, selectedTimeframe]);
 
   // Find current position and watchlist item
   const currentPosition = useMemo(() => {
@@ -62,6 +63,11 @@ const MainBlock: React.FC = () => {
   const isInPositions = !!currentPosition;
   const isInWatchlist = !!currentWatchlistItem;
   const isFromTopbar = selectedStock && !isInPositions && !isInWatchlist;
+
+  // Get current chart data for the selected stock and timeframe
+  const currentChart = useMemo(() => {
+    return stock ? getChartData(stock.symbol, selectedTimeframe) : null;
+  }, [stock?.symbol, selectedTimeframe, getChartData]);
 
   // Handle timeframe change
   const handleTimeframeChange = (timeframe: string) => {
@@ -205,13 +211,15 @@ const MainBlock: React.FC = () => {
               <span className="performance-today text-success">31.96 (+3.18%) Today</span>
             )}
           </div>
-          <div className="main-block-after-hours">
-            <i className="bi bi-arrow-up"></i>
-            <span className="ms-1">0.26 (0.03%) After Hours</span>
-          </div>
-          <div className="main-block-actions">
-            <button className="action-tab-btn active">NEWS</button>
-            <button className="action-tab-btn">Stock Units</button>
+          <div className="d-flex align-items-center gap-3">
+            <div className="main-block-after-hours">
+              <i className="bi bi-arrow-up"></i>
+              <span className="ms-1">0.26 (0.03%) After Hours</span>
+            </div>
+            <div className="main-block-actions">
+              <button className="action-tab-btn active">NEWS</button>
+              <button className="action-tab-btn">Stock Units</button>
+            </div>
           </div>
         </div>
         <div className="col-4">
@@ -244,38 +252,41 @@ const MainBlock: React.FC = () => {
       {/* Chart Section */}
       <div className="row mb-2">
         <div className="col">
-          <div className="rounded p-2 main-block-chart-container">
-            {isChartLoading ? (
-              <div className="d-flex justify-content-center align-items-center" style={{ height: '160px' }}>
-                <div className="spinner-border text-success" role="status">
-                  <span className="visually-hidden">Loading chart...</span>
+          <div className="main-block-chart-container">
+            <div className="chart-inner-container">
+              {isChartLoading ? (
+                <div className="d-flex justify-content-center align-items-center h-100">
+                  <div className="spinner-border text-success" role="status">
+                    <span className="visually-hidden">Loading chart...</span>
+                  </div>
                 </div>
-              </div>
-            ) : currentChart ? (
-                <LineChart
-                  width={800}
-                  height={200}
-                  series={[
-                    {
-                      data: currentChart.y_values,
-                      color: 'var(--primary-green)',
-                      showMark: false,
-                      curve: 'linear'
-                    }
-                  ]}
-                  xAxis={[{ 
-                    disableLine: true, 
-                    disableTicks: true,
-                    tickLabelStyle: { display: 'none' },
-                    data: currentChart.y_values.map((_, index) => index)
-                  }]}
-                  yAxis={[{ 
-                    disableLine: true, 
-                    disableTicks: true,
-                    tickLabelStyle: { display: 'none' }
-                  }]}
-                />
-            ) : null}
+              ) : currentChart ? (
+                  <LineChart
+                    width={1000}
+                    height={180}
+                    margin={{ top: 10, right: 20, bottom: 30, left: 20 }}
+                    series={[
+                      {
+                        data: currentChart.y_values,
+                        color: 'var(--primary-green)',
+                        showMark: false,
+                        curve: 'linear'
+                      }
+                    ]}
+                    xAxis={[{ 
+                      disableLine: true, 
+                      disableTicks: true,
+                      tickLabelStyle: { display: 'none' },
+                      data: currentChart.y_values.map((_: number, index: number) => index)
+                    }]}
+                    yAxis={[{ 
+                      disableLine: true, 
+                      disableTicks: true,
+                      tickLabelStyle: { display: 'none' }
+                    }]}
+                  />
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
@@ -285,7 +296,7 @@ const MainBlock: React.FC = () => {
         <div className="col">
           <div className="chart-controls-container">
             <div className="chart-time-buttons">
-              {['1D', '1W', '1Y', '5Y', 'INTERACTIVE CHART'].map((timeframe) => (
+              {['1D', '1W', '1Y', '5Y'].map((timeframe) => (
                 <button
                   key={timeframe}
                   className={`chart-time-btn ${selectedTimeframe === timeframe ? 'active' : ''}`}
@@ -294,6 +305,9 @@ const MainBlock: React.FC = () => {
                   {timeframe}
                 </button>
               ))}
+              <span className="chart-time-btn disabled" key="interactive-chart">
+                INTERACTIVE CHART
+              </span>
             </div>
           </div>
         </div>
@@ -375,12 +389,9 @@ const MainBlock: React.FC = () => {
               // Show watchlist toggle button for topbar stocks OR watchlist items
               <>
                 <button 
-                  className="btn px-5 main-block-action-btn d-flex align-items-center gap-2"
+                  className="btn px-3 main-block-action-btn d-flex align-items-center gap-2"
                   onClick={handleWatchlistToggle}
                 >
-                  <span style={{ fontSize: '1.2em' }}>
-                    {isInWatchlist ? '❤️' : '🤍'}
-                  </span>
                   {isInWatchlist ? 'REMOVE FROM WATCHLIST' : 'ADD TO WATCHLIST'}
                 </button>
                 {isInWatchlist && (

@@ -29,7 +29,7 @@ export const useStocks = () => {
     currentStock, 
     currentQuote, 
     currentProfile, 
-    currentChart, 
+    chartData, 
     isLoading, 
     isQuoteLoading, 
     isProfileLoading, 
@@ -37,12 +37,19 @@ export const useStocks = () => {
     error 
   } = useAppSelector((state) => state.stocks);
 
+  // Helper function to get chart for specific stock and timeframe
+  const getChartData = (symbol: string, timeframe: string) => {
+    const chartKey = `${symbol}-${timeframe}`;
+    return chartData[chartKey] || null;
+  };
+
   return {
     stocks,
     currentStock,
     currentQuote,
     currentProfile,
-    currentChart,
+    chartData,
+    getChartData,
     isLoading,
     isQuoteLoading,
     isProfileLoading,

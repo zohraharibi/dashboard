@@ -18,8 +18,7 @@ const Topbar: React.FC = () => {
   useEffect(() => {
     if (stocks.length > 0) {
       // Take first 6 stocks from database for topbar display
-      const stocksToShow = stocks.slice(0, 6);
-      const symbols = stocksToShow.map(stock => stock.symbol);
+      const symbols = stocks.map(stock => stock.symbol);
       marketDispatch(fetchMarketQuotes({ symbols }));
     }
   }, [stocks, marketDispatch]);
@@ -55,7 +54,7 @@ const Topbar: React.FC = () => {
     <div className="px-4 topbar-main">
       <div className="d-flex justify-content-between align-items-center w-100">
         <div className="d-flex justify-content-between w-100 align-items-center topbar-content">
-          {stocks.slice(0, 6).map((stock, index) => {
+          {stocks.map((stock, index) => {
             const quote = quotes.find(q => q.symbol === stock.symbol);
             
             return (
@@ -64,7 +63,6 @@ const Topbar: React.FC = () => {
                 <div 
                   className="text-center"
                   onClick={() => handleStockClick(stock)}
-                  style={{ cursor: 'pointer' }}
                 >
                   <div className="d-flex align-items-center justify-content-center gap-2 mb-1">
                     <small className="topbar-label">{stock.symbol}</small>

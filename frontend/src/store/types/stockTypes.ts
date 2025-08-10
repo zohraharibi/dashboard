@@ -107,7 +107,7 @@ export interface StocksState {
   currentStock: Stock | null;
   currentQuote: StockQuote | null;
   currentProfile: StockProfile | null;
-  currentChart: ChartData | null;
+  chartData: Record<string, ChartData>; // Store charts by "symbol-timeframe" key
   isLoading: boolean;
   isQuoteLoading: boolean;
   isProfileLoading: boolean;

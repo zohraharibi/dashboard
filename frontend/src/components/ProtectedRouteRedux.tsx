@@ -20,7 +20,7 @@ const ProtectedRouteRedux: React.FC<ProtectedRouteReduxProps> = ({ children }) =
   // Show loading spinner while checking authentication
   if (isLoading) {
     return (
-      <div className="d-flex justify-content-center align-items-center min-vh-100">
+      <div className="auth-loading-overlay d-flex justify-content-center align-items-center">
         <div className="text-center">
           <div className="spinner-border text-success mb-3" role="status" style={{ width: '3rem', height: '3rem' }}>
             <span className="visually-hidden">Loading...</span>

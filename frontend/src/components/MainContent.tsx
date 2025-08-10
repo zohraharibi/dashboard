@@ -13,18 +13,22 @@ const MainContent: React.FC<MainContentProps> = ({ activeView }) => {
   return (
     <>
     {activeView === 'dashboard' ? (
-      <div className="row g-0 h-100">
-        <div className="col-md-8 col-lg-9">
+      <div className="main-content-grid">
+        <div className="main-content-primary">
           <MainBlock />
         </div>
-        <div className="col-md-4 col-lg-3 ps-2">
+        <div className="main-content-secondary">
           <SideBlock />
         </div>
       </div>
     ) : activeView === 'trade-history' ? (
-      <TradeHistory />
+      <div className="main-content-full">
+        <TradeHistory />
+      </div>
     ) : (
-      <Info />
+      <div className="main-content-full">
+        <Info />
+      </div>
     )}
     </>
   );

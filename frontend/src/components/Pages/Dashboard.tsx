@@ -13,18 +13,17 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="container-fluid p-0 dashboard-container">
-      <div className="row g-0 dashboard-row">
-        <div className="col-auto">
-          <Sidebar activeView={activeView} onViewChange={handleViewChange} />
-        </div>
-        
-        <div className="col dashboard-main-col">
-          <Topbar />
-          <div className="row g-0 dashboard-content-row">
-            <MainContent activeView={activeView} />
-          </div>
-        </div>
+    <div className="dashboard-container">
+      <div className="dashboard-sidebar">
+        <Sidebar activeView={activeView} onViewChange={handleViewChange} />
+      </div>
+      
+      <div className="dashboard-topbar">
+        <Topbar />
+      </div>
+      
+      <div className="dashboard-content">
+        <MainContent activeView={activeView} />
       </div>
     </div>
   );
