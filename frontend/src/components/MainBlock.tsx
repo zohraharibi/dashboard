@@ -62,7 +62,6 @@ const MainBlock: React.FC = () => {
 
   const isInPositions = !!currentPosition;
   const isInWatchlist = !!currentWatchlistItem;
-  const isFromTopbar = selectedStock && !isInPositions && !isInWatchlist;
 
   // Get current chart data for the selected stock and timeframe
   const currentChart = useMemo(() => {
@@ -262,9 +261,9 @@ const MainBlock: React.FC = () => {
                 </div>
               ) : currentChart ? (
                   <LineChart
-                    width={1000}
-                    height={180}
-                    margin={{ top: 10, right: 20, bottom: 30, left: 20 }}
+                    width={1400}
+                    height={150}
+                    margin={{ top: 10, right: 20, bottom: 50, left: 20 }}
                     series={[
                       {
                         data: currentChart.y_values,
@@ -292,10 +291,10 @@ const MainBlock: React.FC = () => {
       </div>
 
       {/* Chart Controls */}
-      <div className="row mb-3">
+      <div className="row mb-2">
         <div className="col">
           <div className="chart-controls-container">
-            <div className="chart-time-buttons">
+            <div className="chart-time-buttons mb-1">
               {['1D', '1W', '1Y', '5Y'].map((timeframe) => (
                 <button
                   key={timeframe}
@@ -312,9 +311,6 @@ const MainBlock: React.FC = () => {
           </div>
         </div>
       </div>
-
-      {/* Horizontal separator */}
-      <div className="main-block-horizontal-separator"></div>
 
       {/* Stats Section */}
       <div className="row">
@@ -350,7 +346,9 @@ const MainBlock: React.FC = () => {
               </div>
               <div className="col-6 stats-about-separator">
                 <div className="main-block-section-title">ABOUT</div>
-                {stock?.description}
+                <div className="about-description">
+                  {stock?.description}
+                </div>
                 <table className="table table-sm main-block-stats-table">
                   <tbody>
                     <tr>
@@ -385,34 +383,46 @@ const MainBlock: React.FC = () => {
       <div className="row">
         <div className="col">
           <div className="d-flex justify-content-end gap-2">
-            {isFromTopbar || isInWatchlist ? (
-              // Show watchlist toggle button for topbar stocks OR watchlist items
+            {isInWatchlist ? (
+              // Show remove from watchlist + buy for watchlist items
               <>
                 <button 
                   className="btn px-3 main-block-action-btn d-flex align-items-center gap-2"
                   onClick={handleWatchlistToggle}
                 >
-                  {isInWatchlist ? 'REMOVE FROM WATCHLIST' : 'ADD TO WATCHLIST'}
+                  REMOVE FROM WATCHLIST
                 </button>
-                {isInWatchlist && (
-                  // Show BUY button for watchlist items
-                  <button 
-                    className="btn px-5 main-block-action-btn"
-                    onClick={handleBuyClick}
-                  >
-                    BUY
-                  </button>
-                )}
+                <button 
+                  className="btn px-5 main-block-action-btn"
+                  onClick={handleBuyClick}
+                >
+                  BUY
+                </button>
               </>
-            ) : (
-              // Show traditional buy/sell buttons for stocks from positions only
+            ) : isInPositions ? (
+              // Show sell/buy for owned positions
               <>
                 <button 
-                  className={`btn px-5 main-block-action-btn ${!isInPositions ? 'disabled' : ''}`}
+                  className="btn px-5 main-block-action-btn"
                   onClick={handleSellClick}
-                  disabled={!isInPositions}
                 >
                   SELL
+                </button>
+                <button 
+                  className="btn px-5 main-block-action-btn"
+                  onClick={handleBuyClick}
+                >
+                  BUY
+                </button>
+              </>
+            ) : (
+              // Show add to watchlist + buy for stocks not owned or watched
+              <>
+                <button 
+                  className="btn px-3 main-block-action-btn d-flex align-items-center gap-2"
+                  onClick={handleWatchlistToggle}
+                >
+                  ADD TO WATCHLIST
                 </button>
                 <button 
                   className="btn px-5 main-block-action-btn"

@@ -83,7 +83,6 @@ const Info: React.FC = () => {
             How much the stock price has changed since yesterday's close.
           </p>
           <p className="info-example">
-            Often displayed in green/red:<br />
             <span className="text-success">Green = stock is up</span><br />
             <span className="text-danger">Red = stock is down</span>
           </p>
@@ -151,97 +150,6 @@ const Info: React.FC = () => {
           </p>
         </div>
 
-        <div className="info-section">
-          <h2 className="info-section-title"> 11. Order Types (Optional)</h2>
-          <p className="info-text">
-            If you want to go further:
-          </p>
-          <ul className="info-list">
-            <li><strong>Market Order:</strong> Buy/Sell immediately at current price.</li>
-            <li><strong>Limit Order:</strong> Buy/Sell only if price hits a target.</li>
-          </ul>
-        </div>
-
-        <div className="info-section">
-          <h2 className="info-section-title"> Example</h2>
-          <div className="info-table-container">
-            <table className="info-table">
-              <thead>
-                <tr>
-                  <th>UI Section</th>
-                  <th>Trading Concept</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>$1037.40</strong></td>
-                  <td>Current price of selected stock (e.g., GOOGL)</td>
-                </tr>
-                <tr>
-                  <td><strong>(+3.18%) Today</strong></td>
-                  <td>Daily price change / performance</td>
-                </tr>
-                <tr>
-                  <td><strong>After Hours</strong></td>
-                  <td>Price movement after market close</td>
-                </tr>
-                <tr>
-                  <td><strong>Positions</strong></td>
-                  <td>Stocks user owns (with shares + buy price)</td>
-                </tr>
-                <tr>
-                  <td><strong>Watchlist</strong></td>
-                  <td>Stocks user is tracking (but doesn't own)</td>
-                </tr>
-                <tr>
-                  <td><strong>Stats section</strong></td>
-                  <td>Financial data like P/E, Volume, High/Low</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Summary */}
-        <div className="info-section info-summary">
-          <h2 className="info-section-title">✅ Summary of Key Concepts</h2>
-          <div className="info-table-container">
-            <table className="info-table">
-              <thead>
-                <tr>
-                  <th>Concept</th>
-                  <th>You Should Understand...</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>Shares</strong></td>
-                  <td>What they are and how users own them</td>
-                </tr>
-                <tr>
-                  <td><strong>Portfolio</strong></td>
-                  <td>What a user owns</td>
-                </tr>
-                <tr>
-                  <td><strong>Watchlist</strong></td>
-                  <td>What a user is following</td>
-                </tr>
-                <tr>
-                  <td><strong>Stock price</strong></td>
-                  <td>How it changes, daily/52-week/etc.</td>
-                </tr>
-                <tr>
-                  <td><strong>Buy/Sell actions</strong></td>
-                  <td>How users simulate trades</td>
-                </tr>
-                <tr>
-                  <td><strong>Metrics</strong></td>
-                  <td>Open, High, Low, Volume, P/E, Market Cap</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
       </div>
     </div>
   );

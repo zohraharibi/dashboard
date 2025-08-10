@@ -51,7 +51,7 @@ const Topbar: React.FC = () => {
   }
 
   return (
-    <div className="px-4 topbar-main">
+    <div className="px-5 topbar-main">
       <div className="d-flex justify-content-between align-items-center w-100">
         <div className="d-flex justify-content-between w-100 align-items-center topbar-content">
           {stocks.map((stock, index) => {

@@ -226,6 +226,7 @@ body {
   margin-left: 20px;
   margin-top: 70px;
   height: calc(100vh - 70px);
+  width: calc(100vw - 100px);
   overflow-y: auto;
 }
 
@@ -423,15 +424,15 @@ body {
 }
 
 .main-content-full {
-  display: grid;
-  grid-template-columns: 1fr 8fr 1fr;
-  gap: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
   height: 100%;
-  padding: 0.5rem;
+  width: 100%;
+  padding: 1rem;
 }
 
 .main-content-full > * {
-  grid-column: 2;
   width: 100%;
 }
 
@@ -1105,6 +1106,15 @@ body {
   color: var(--text-secondary);
 }
 
+.about-description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-clamp: 2;
+}
+
 .main-block-section-title {
   font-size: 0.9rem;
   font-weight: bold;
@@ -1209,6 +1219,12 @@ body {
   align-items: center;
   width: 100%;
   overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.topbar-main::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 
@@ -1326,6 +1342,7 @@ body {
   border-left: 1px solid var(--border-light);
   padding-left: 1.5rem;
 }
+
 
 /* Trade Modal Styles */
 .trade-modal-overlay {

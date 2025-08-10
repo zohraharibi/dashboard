@@ -97,11 +97,7 @@ const TradeHistory: React.FC = () => {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <span className={`badge px-3 py-2 ${
-                              trade.trade_type === 'BUY' 
-                                ? 'trade-badge-buy' 
-                                : 'trade-badge-sell'
-                            }`}>
+                            <span className={" py-2 "}>
                               {trade.trade_type}
                             </span>
                           </td>
