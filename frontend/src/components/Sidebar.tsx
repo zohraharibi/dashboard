@@ -36,14 +36,12 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
   };
   return (
     <div className="d-flex flex-column sidebar-main">
-      {/* Logo */}
       <div className="p-3 text-center">
         <div className="rounded-circle d-inline-flex align-items-center justify-content-center sidebar-logo">
           <i className="bi bi-graph-up text-white"></i>
         </div>
       </div>
 
-      {/* User Profile */}
       {user && (
         <div className="px-3 pb-2 text-center">
           <div className="user-profile-sidebar">
@@ -58,7 +56,6 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
         </div>
       )}
 
-      {/* Navigation */}
       <nav className="flex-grow-1 py-3">
         <ul className="nav nav-pills flex-column align-items-center">
           <li className="nav-item mb-3">

@@ -34,11 +34,17 @@ const MainBlock: React.FC = () => {
   // Use selected stock or first item from watchlist, otherwise show empty block
   const stock = selectedStock || (watchlistItems.length > 0 ? watchlistItems[0].stock : null);
 
-  // Fetch stock data when stock changes
+  // Fetch quote and profile data only when stock changes
   useEffect(() => {
     if (stock?.symbol) {
       stocksDispatch(getStockQuote(stock.symbol));
       stocksDispatch(getStockProfile(stock.symbol));
+    }
+  }, [stock?.symbol, stocksDispatch]);
+
+  // Fetch chart data when stock OR timeframe changes
+  useEffect(() => {
+    if (stock?.symbol) {
       stocksDispatch(getStockChart({ symbol: stock.symbol, timeframe: selectedTimeframe }));
     }
   }, [stock?.symbol, selectedTimeframe, stocksDispatch]);
@@ -306,15 +312,15 @@ const MainBlock: React.FC = () => {
                   <tbody>
                     <tr>
                       <td>Open</td>
-                      <td className="text-end">{currentQuote?.open_price?.toFixed(2) || '—'}</td>
+                      <td className="text-end">{isQuoteLoading ? 'Loading...' : (currentQuote?.open_price?.toFixed(2) || '—')}</td>
                     </tr>
                     <tr>
                       <td>High</td>
-                      <td className="text-end">{currentQuote?.high_price?.toFixed(2) || '—'}</td>
+                      <td className="text-end">{isQuoteLoading ? 'Loading...' : (currentQuote?.high_price?.toFixed(2) || '—')}</td>
                     </tr>
                     <tr>
                       <td>Low</td>
-                      <td className="text-end">{currentQuote?.low_price?.toFixed(2) || '—'}</td>
+                      <td className="text-end">{isQuoteLoading ? 'Loading...' : (currentQuote?.low_price?.toFixed(2) || '—')}</td>
                     </tr>
                     <tr>
                       <td>Volume</td>
@@ -345,7 +351,7 @@ const MainBlock: React.FC = () => {
                     </tr>
                     <tr>
                       <td>Mkt Cap</td>
-                      <td className="text-end">{currentProfile?.marketCapitalization ? `$${(currentProfile.marketCapitalization / 1000000000).toFixed(2)}B` : '—'}</td>
+                      <td className="text-end">{isProfileLoading ? 'Loading...' : (currentProfile?.marketCapitalization ? `$${(currentProfile.marketCapitalization / 1000000000).toFixed(2)}B` : '—')}</td>
                     </tr>
                     <tr>
                       <td>P/E Ratio</td>

@@ -99,6 +99,41 @@
   border-color: var(--border-light);
 }
 
+/* Dark mode overrides for TradeHistory card components */
+[data-theme="dark"] .card {
+  background-color: var(--bg-primary) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .card-header {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .card-body {
+  background-color: var(--bg-primary) !important;
+}
+
+[data-theme="dark"] .card-footer {
+  background-color: var(--bg-secondary) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .table thead th {
+  background-color: var(--bg-secondary) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border-light) !important;
+}
+
+[data-theme="dark"] .table tbody tr {
+  background-color: var(--bg-primary) !important;
+}
+
+[data-theme="dark"] .table tbody td {
+  color: var(--text-primary) !important;
+  border-color: var(--border-light) !important;
+}
+
 .text-xl { font-size: 2.25rem}
 .text-lg { font-size: 1.5rem; }
 .text-md { font-size: 1rem; }
