@@ -8,7 +8,7 @@ import type {
 } from '../types/authTypes';
 
 // API base URL - should match your backend
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 // Helper function to get auth headers
 const getAuthHeaders = () => {

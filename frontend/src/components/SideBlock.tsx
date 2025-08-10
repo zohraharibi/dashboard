@@ -107,7 +107,7 @@ const SideBlock: React.FC = () => {
                   <div className="watchlist-chart">
                     {chartData[item.stock.symbol]?.y_values?.length > 0 ? (
                       <LineChart
-                        width={120}
+                        width={150}
                         height={60}
                         series={[
                           {
@@ -117,7 +117,7 @@ const SideBlock: React.FC = () => {
                             curve: 'linear'
                           }
                         ]}
-                        margin={{ left: 15, right: 15, top: 15, bottom: 15 }}
+                        margin={{ left: 5, right: 5, top: 5, bottom: 5 }}
                         xAxis={[
                           {
                             hideTooltip: true,
@@ -186,8 +186,8 @@ const SideBlock: React.FC = () => {
                     <div className="watchlist-chart">
                       {chartData[item.stock.symbol]?.y_values?.length > 0 ? (
                         <LineChart
-                          width={80}
-                          height={30}
+                          width={150}
+                          height={60}
                           series={[
                             {
                               data: chartData[item.stock.symbol].y_values,
@@ -196,7 +196,7 @@ const SideBlock: React.FC = () => {
                               curve: 'linear'
                             }
                           ]}
-                          margin={{ left: 15, right: 15, top: 15 }}
+                          margin={{ left: 2, right: 2, top: 2, bottom: 2 }}
                           xAxis={[
                             {
                               hideTooltip: true,
@@ -219,7 +219,7 @@ const SideBlock: React.FC = () => {
                         <div
                           style={{
                             width: '80px',
-                            height: '30px',
+                            height: '40px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',

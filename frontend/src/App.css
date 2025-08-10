@@ -243,6 +243,16 @@ body {
   color: var(--primary-green);
 }
 
+.nav-link:hover {
+  color: var(--primary-green) !important;
+}
+
+.nav-link:active,
+.nav-link:focus,
+.nav-link.active {
+  color: var(--primary-green) !important;
+}
+
 /* Topbar Styles */
 .topbar-container {
   height: 88px;
@@ -254,6 +264,12 @@ body {
 
 .topbar-indicator {
   text-align: center;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.topbar-indicator:hover {
+  transform: scale(1.05);
 }
 
 .topbar-indicator-name {
@@ -276,6 +292,15 @@ body {
 .topbar-separator {
   height: 40px;
   border-color: var(--border-light);
+}
+
+.topbar-content .text-center {
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.topbar-content .text-center:hover {
+  transform: scale(1.05);
 }
 
 /* main-block Component Styles */
@@ -1612,4 +1637,3 @@ html, body, #root {
   background-color: var(--bg-secondary);
   transform: scale(1.05); 
 }
-
