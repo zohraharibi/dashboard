@@ -365,7 +365,7 @@ const MainBlock: React.FC = () => {
                     </tr>
                     <tr>
                       <td>Mkt Cap</td>
-                      <td className="text-end">{isProfileLoading ? 'Loading...' : (currentProfile?.marketCapitalization ? `$${(currentProfile.marketCapitalization / 1000000000).toFixed(2)}B` : '—')}</td>
+                      <td className="text-end">{isProfileLoading ? 'Loading...' : '$' + (currentProfile?.marketCapitalization)?.toFixed(2)}</td>
                     </tr>
                     <tr>
                       <td>P/E Ratio</td>

@@ -49,8 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeView, onViewChange }) => {
               <i className="bi bi-person-circle fs-4 text-muted"></i>
             </div>
             <div className="user-info">
-              <div className="user-name">{user.full_name || user.username}</div>
-              <div className="user-email">{user.email}</div>
+              <div className="user-name">{user.full_name}</div>
             </div>
           </div>
         </div>
