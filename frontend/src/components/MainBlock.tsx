@@ -313,15 +313,15 @@ const MainBlock: React.FC = () => {
                   <tbody>
                     <tr>
                       <td>Open</td>
-                      <td className="text-end">{isQuoteLoading ? 'Loading...' : (currentQuote?.open_price?.toFixed(2) || '—')}</td>
+                      <td className="text-end">{isQuoteLoading ? 'Loading...' : (currentQuote?.open_price ? formatCurrency(currentQuote.open_price, stock?.currency || 'USD') : '—')}</td>
                     </tr>
                     <tr>
                       <td>High</td>
-                      <td className="text-end">{isQuoteLoading ? 'Loading...' : (currentQuote?.high_price?.toFixed(2) || '—')}</td>
+                      <td className="text-end">{isQuoteLoading ? 'Loading...' : (currentQuote?.high_price ? formatCurrency(currentQuote.high_price, stock?.currency || 'USD') : '—')}</td>
                     </tr>
                     <tr>
                       <td>Low</td>
-                      <td className="text-end">{isQuoteLoading ? 'Loading...' : (currentQuote?.low_price?.toFixed(2) || '—')}</td>
+                      <td className="text-end">{isQuoteLoading ? 'Loading...' : (currentQuote?.low_price ? formatCurrency(currentQuote.low_price, stock?.currency || 'USD') : '—')}</td>
                     </tr>
                     <tr>
                       <td>Volume</td>
@@ -336,6 +336,7 @@ const MainBlock: React.FC = () => {
               </div>
               <div className="col-6 stats-about-separator">
                 <div className="main-block-section-title">ABOUT</div>
+                {stock?.description}
                 <table className="table table-sm main-block-stats-table">
                   <tbody>
                     <tr>
