@@ -29,6 +29,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://dashboard-frontend-n88x.onrender.com",
+        "https://dashboard-cg7h.onrender.com",
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -109,7 +110,6 @@ async def health_check():
             "version": "1.0.0"
         }
 
-# Global exception handlers
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """Handle validation errors."""
