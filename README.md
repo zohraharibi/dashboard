@@ -4,10 +4,6 @@ A modern, full-stack trading simulation platform built with React and FastAPI, f
 
 **Live Demo**: [Deployed on Render, Click here to test it](https://dashboard-frontend-n88x.onrender.com)
 
-![Status](https://img.shields.io/badge/Status-Active-brightgreen)  
-![React](https://img.shields.io/badge/React-18.x-blue)  
-![FastAPI](https://img.shields.io/badge/FastAPI-Latest-green)  
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue)  
 
 ## Table of Contents
 
@@ -32,18 +28,61 @@ A modern, full-stack trading simulation platform built with React and FastAPI, f
    - [Relationships](#relationships)  
 7. [Configuration](#configuration)  
    - [API Keys Required](#api-keys-required)  
-8. [Testing](#testing)  
-9. [Deployment](#deployment)  
-10. [Contributing](#contributing)  
-11. [License](#license)  
 
 ## Features
+
 
 ### Real-Time Trading Interface
 - Live stock quotes and price updates  
 - Interactive charts with multiple timeframes (1D, 1W, 1Y, 5Y)  
 - Professional trading interface with buy/sell functionality  
-- Real-time portfolio performance tracking  
+- Real-time portfolio performance tracking
+
+  You need first to create an account or login if you already have an account.
+  
+<img width="1920" height="921" alt="signup" src="https://github.com/user-attachments/assets/bd39ca31-5b82-454e-816f-725712e314ca" />
+
+<img width="1920" height="919" alt="signin" src="https://github.com/user-attachments/assets/c50d0ca8-4c87-4cdc-af2e-475bcb57d988" />
+
+
+<br><br>
+Then You will view the real-time trading interface.
+So the topbar contains the stocks and this section is the same for all users, and the sideblock on the right contains the positions and the watchlist of the current user.
+
+  <img width="1920" height="923" alt="dashboard" src="https://github.com/user-attachments/assets/e1e46b30-cc42-4bf5-bebc-729dd1e9216e" />
+  Initially a user doesn't have any positions or watchlist
+  <img width="1920" height="928" alt="image" src="https://github.com/user-attachments/assets/2cc50e6e-e165-4d2f-ade5-acb1abefbfe3" />
+
+
+<br><br>
+  You can add a stock to a wachlist by clicking on "Add to watchlist", and if you want to remove a stock from watchlist you can click on "Remove From watchlist".
+
+<img width="1920" height="925" alt="dashboard-stock" src="https://github.com/user-attachments/assets/537a453b-7e93-4d59-b8b1-0f42d8f98232" />
+
+ <br><br>
+ Or you can Buy shares from watchlist and it would move to the positions section.
+<img width="1920" height="925" alt="5" src="https://github.com/user-attachments/assets/41b52c60-8729-48be-8eea-5f8351c9db12" />
+
+  <br><br>
+  In positions section, you can buy more shares, or sell few or all shares.
+<img width="1920" height="926" alt="6" src="https://github.com/user-attachments/assets/5c8736de-181a-4384-81d9-6e1ecf328ed3" />
+
+ Of course you can't sell more shares than the ones that you have.
+<img width="1920" height="925" alt="7" src="https://github.com/user-attachments/assets/510d986b-332f-4fcd-affe-bf15e01bf098" />
+<img width="1920" height="915" alt="8" src="https://github.com/user-attachments/assets/4967a8ef-a910-4e00-9af5-b9b504f4e2c3" />
+
+   <br><br>
+
+
+You can view all your trade history in this section and know your overall gain or loss
+<img width="1920" height="917" alt="9" src="https://github.com/user-attachments/assets/91535eec-a178-4c86-a3d7-d6241180140a" />
+If there is no history for the user, then nothing would be displayed
+<img width="1920" height="927" alt="image" src="https://github.com/user-attachments/assets/3d103ad7-baec-4239-bcc7-f714e2d2dc7c" />
+
+
+  And this last section is to view the trade guide. This is static content.
+<img width="1920" height="918" alt="10" src="https://github.com/user-attachments/assets/5498f3be-555a-482f-9eae-6c16c7f80183" />
+
 
 ### Portfolio Management
 - Complete position tracking with profit/loss calculations  
@@ -53,35 +92,20 @@ A modern, full-stack trading simulation platform built with React and FastAPI, f
 
 ### Modern UIUX
 - Responsive design with mobile support  
-- Dark/Light theme switching  
-- Professional trading dashboard layout  
-- Real-time data visualization with charts  
+- Dark/Light theme switching
+<img width="1920" height="919" alt="11" src="https://github.com/user-attachments/assets/d917f51a-b974-4726-934a-d9a45abd311d" />
+- Real-time data visualization with charts
+  
 
 ### Authentication and Security
-- JWT-based authentication system  
-- Secure user registration and login  
-- Protected routes and API endpoints  
-- Session management with token validation
+- JWT-based authentication system
+- JWT Authentication Implementation
+- Backend JWT Setup:
+- Library: Using python-jose for JWT handling
+- Token Expiration: 30 minutes by default (or configurable via environment variable with ACCESS_TOKEN_EXPIRE_MINUTES)
+- Security: HTTPBearer scheme for token transmission
+ 
 
-  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/62e92365-c8d2-416f-b6b3-1c11a5b75939" />
-  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/3adab3d8-8449-414d-980f-52d713ca853f" />
-
-
-  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9eed00a6-dffa-4d70-8264-f2ba87bcd364" />
-  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/35c9cd0c-d062-4e0b-9b56-0f80b40d39f5" />
-  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e6e59b89-1232-4e03-af63-931edee02055" />
-  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/dbb80736-9f7b-4fcc-8626-a6bbe1bf4e28" />
-  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/63e0efca-74f6-498c-9191-19ec3eac223b" />
-  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b21f777f-96bb-415a-bb72-573bb055eecb" />
-
-
-
-
-
-
-
-  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/abbc008a-7a28-4369-8035-a5bfd4cea019" />
-  <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c8a8c237-4f0c-4256-8e70-6b64988fb6c6" />
 
 
 
@@ -90,14 +114,14 @@ A modern, full-stack trading simulation platform built with React and FastAPI, f
 ## Tech Stack
 
 ### Frontend
-- React 18 with TypeScript  
+- React 19.1.0 with TypeScript  
 - Redux Toolkit for state management  
 - MUI X Charts for data visualization  
 - Bootstrap 5 for responsive design  
 - React Router for navigation  
 
 ### Backend
-- FastAPI with Python 3.8+  
+- FastAPI with Python 3.8+  (the one that I am using is 3.9.7)
 - PostgreSQL database
 - SQLAlchemy ORM  
 - JWT authentication  
@@ -105,12 +129,10 @@ A modern, full-stack trading simulation platform built with React and FastAPI, f
 
 ### External APIs
 - Finnhub for real-time stock data  
-- Alpha Vantage for additional financial data  
 
 ## Prerequisites
-- Node.js (v16 or higher)  
-- Python (3.8 or higher)  
-- PostgreSQL (12 or higher)  
+- Node (recommended v20 or higher) I am using v22.12.0
+- Python (3.8 or higher)  I am using 3.9.7
 - npm or yarn  
 - Git  
 
@@ -118,8 +140,8 @@ A modern, full-stack trading simulation platform built with React and FastAPI, f
 
 ### Clone the Repository
 ```bash
-git clone https://github.com/your-username/trading-dashboard.git
-cd trading-dashboard
+git clone [https://github.com/zohraharibi/dashboard](https://github.com/zohraharibi/dashboard)
+cd dashboard
 ```
 
 ### Backend Setup
@@ -133,16 +155,32 @@ pip install -r requirements.txt
 #### Environment Configuration
 Create a `.env` file in the backend directory:
 ```env
-DATABASE_URL=postgresql://username:password@localhost:5432/trading_db
-SECRET_KEY=your-super-secret-jwt-key
-ALGORITHM=HS256
+DATABASE_URL=postgresql://zohra:KrSLEJJSwNUFdIvpNDOzD5ydLtWtCKOk@dpg-d2affku3jp1c73ajd680-a.oregon-postgres.render.com/trading_g1gu
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 FINNHUB_API_KEY=your-finnhub-api-key
-ALPHA_VANTAGE_API_KEY=your-alpha-vantage-api-key
+PORT = 8000
 ```
-
+You should also add in main.py the localhost url, because only the render url is added
+```main.py
+allow_origins=[
+        "https://dashboard-frontend-n88x.onrender.com",
+        "http://localhost:5173",
+    ],
+```
+and replace uvicorn.run in start_server.py by this
+```start_server.py
+        uvicorn.run(
+            "main:app",
+            host="0.0.0.0",
+            port=8000,
+            reload=True,
+            log_level="info",
+            access_log=True
+        )
+```
 #### Database Setup
-I have used a remote database 
+I have used a remote database in postgresql as mentioned in the environment configurations. The link was provided by render.
+
 #### Start Backend Server
 ```bash
 python start_server.py
@@ -151,24 +189,25 @@ python start_server.py
 ### Frontend Setup
 
 #### Install Dependencies
+In a new terminal access the frontend folder
 ```bash
-cd ../frontend
+cd frontend
 npm install
 ```
 
 #### Environment Configuration
 Create a `.env` file in the frontend directory:
 ```env
-REACT_APP_API_BASE_URL=http://localhost:8000
+VITE_API_URL=http://localhost:8000
 ```
 
 #### Start Frontend Development Server
 ```bash
-npm start
+npm run dev
 ```
 
 ### Access the Application
-- **Frontend**: http://localhost:3000  
+- **Frontend**: http://localhost:5173  
 - **Backend API**: http://localhost:8000  
 - **API Docs**: http://localhost:8000/docs  
 
@@ -277,19 +316,17 @@ CREATE TABLE trade_history (
 
 ### API Keys Required
 1. **Finnhub API Key** — [Sign up here](https://finnhub.io/)  
-2. **Alpha Vantage API Key** — [Sign up here](https://www.alphavantage.co/support/#api-key)  
 
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `DATABASE_URL` | PostgreSQL connection string | ✅ |
 | `SECRET_KEY` | JWT secret key | ✅ |
 | `FINNHUB_API_KEY` | Finnhub API key | ✅ |
-| `ALPHA_VANTAGE_API_KEY` | Alpha Vantage API key | ✅ |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | JWT token expiration | ❌ |
 
 ## API Documentation
 
-The Trading Dashboard provides a comprehensive REST API with the following endpoints:
+The Trading Dashboard provides a comprehensive REST API with the following endpoints, please note that not all of these apis are used currently. But this project will get improved and use all of them and even add more apis to make it richer! No admin dashboard is available for now
 
 ### Authentication Endpoints (`/auth`)
 - `POST /auth/register` - Register a new user account
@@ -362,6 +399,6 @@ curl -X POST "http://localhost:8000/positions/" \
 
 
 <div align="center">
-  <strong>Built with ❤️ by Fortaegis Technologies B.V</strong>
+  <strong>Built with ❤️ For Fortaegis Technologies B.V</strong>
 </div>
 
