@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../store/hooks';
 import { loginUser, signupUser } from '../../store/actions/authActions';
 import { handleApiError } from '../../services/api';
+import { toast } from 'react-toastify';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -14,13 +15,53 @@ const Login: React.FC = () => {
     password: '',
     confirmPassword: '',
   });
+  const [signupError, setSignupError] = useState<string>('');
 
   const { isLoading, error, dispatch } = useAuth();
 
   // Clear errors when component mounts or form switches
   useEffect(() => {
-    // Clear error when switching between login/signup forms
+    // Clear signup error when switching between login/signup forms
+    setSignupError('');
   }, [showSignup]);
+
+  // Validation functions
+  const validateEmail = (email: string): string => {
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email) return 'Email is required';
+    if (!emailPattern.test(email)) return 'Please enter a valid email address';
+    return '';
+  };
+
+  const validateUsername = (username: string): string => {
+    if (!username) return 'Username is required';
+    if (username.length < 3) return 'Username must be at least 3 characters long';
+    if (username.length > 50) return 'Username must be less than 50 characters';
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) return 'Username can only contain letters, numbers, and underscores';
+    return '';
+  };
+
+  const validatePassword = (password: string): string => {
+    if (!password) return 'Password is required';
+    if (password.length < 8) return 'Password must be at least 8 characters long';
+    if (!/[A-Za-z]/.test(password)) return 'Password must contain at least one letter';
+    if (!/[0-9]/.test(password)) return 'Password must contain at least one number';
+    return '';
+  };
+
+  const validateFullName = (fullName: string): string => {
+    if (!fullName) return 'Full name is required';
+    if (fullName.length > 100) return 'Full name must be less than 100 characters';
+    return '';
+  };
+
+  const validateConfirmPassword = (password: string, confirmPassword: string): string => {
+    if (!confirmPassword) return 'Please confirm your password';
+    if (password !== confirmPassword) return 'Passwords do not match';
+    return '';
+  };
+
+
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,12 +78,39 @@ const Login: React.FC = () => {
   const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validate passwords match
-    if (signupData.password !== signupData.confirmPassword) {
-      // You might want to add a local error state for this
-      alert('Passwords do not match');
+    // Validate all fields and show first error found
+    const emailError = validateEmail(signupData.email);
+    if (emailError) {
+      setSignupError(emailError);
       return;
     }
+    
+    const usernameError = validateUsername(signupData.username);
+    if (usernameError) {
+      setSignupError(usernameError);
+      return;
+    }
+    
+    const fullNameError = validateFullName(signupData.full_name);
+    if (fullNameError) {
+      setSignupError(fullNameError);
+      return;
+    }
+    
+    const passwordError = validatePassword(signupData.password);
+    if (passwordError) {
+      setSignupError(passwordError);
+      return;
+    }
+    
+    const confirmPasswordError = validateConfirmPassword(signupData.password, signupData.confirmPassword);
+    if (confirmPasswordError) {
+      setSignupError(confirmPasswordError);
+      return;
+    }
+
+    // Clear signup error if all fields are valid
+    setSignupError('');
 
     try {
       await dispatch(signupUser({
@@ -53,7 +121,14 @@ const Login: React.FC = () => {
       })).unwrap();
       // After successful signup, switch to login form
       setShowSignup(false);
-      alert('Account created successfully! Please log in.');
+      toast.success('Account created successfully! Please log in.', {
+        position: 'top-right',
+        autoClose: 4000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     } catch (error) {
       // Error is handled by Redux state
       console.error('Signup failed:', handleApiError(error));
@@ -76,10 +151,10 @@ const Login: React.FC = () => {
           </div>
 
           {/* Error Display */}
-          {error && (
+          {(error || signupError) && (
             <div className="alert alert-danger" role="alert">
               <i className="bi bi-exclamation-triangle me-2"></i>
-              {error}
+              {error || signupError}
             </div>
           )}
 
@@ -155,6 +230,7 @@ const Login: React.FC = () => {
                       required
                       disabled={isLoading}
                     />
+
                   </div>
                 </div>
                 <div className="col-md-6">
@@ -173,6 +249,7 @@ const Login: React.FC = () => {
                       required
                       disabled={isLoading}
                     />
+
                   </div>
                 </div>
               </div>
@@ -192,6 +269,7 @@ const Login: React.FC = () => {
                   required
                   disabled={isLoading}
                 />
+
               </div>
 
               <div className="row">
@@ -210,8 +288,9 @@ const Login: React.FC = () => {
                       placeholder="Create a password"
                       required
                       disabled={isLoading}
-                      minLength={6}
+                      minLength={8}
                     />
+
                   </div>
                 </div>
                 <div className="col-md-6">
@@ -229,7 +308,7 @@ const Login: React.FC = () => {
                       placeholder="Confirm your password"
                       required
                       disabled={isLoading}
-                      minLength={6}
+                      minLength={8}
                     />
                   </div>
                 </div>
