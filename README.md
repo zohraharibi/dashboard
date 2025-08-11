@@ -73,7 +73,6 @@ So the topbar contains the stocks and this section is the same for all users, an
 
    <br><br>
 
-
 You can view all your trade history in this section and know your overall gain or loss
 <img width="1920" height="917" alt="9" src="https://github.com/user-attachments/assets/91535eec-a178-4c86-a3d7-d6241180140a" />
 If there is no history for the user, then nothing would be displayed
